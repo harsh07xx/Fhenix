@@ -1,0 +1,3027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CipherShield — Private finance, without public exposure.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --bg: #06080f;
+    --bg-alt: #0a0e1b;
+    --surface: rgba(255,255,255,0.035);
+    --surface-strong: rgba(255,255,255,0.06);
+    --border: rgba(150,160,210,0.14);
+    --border-bright: rgba(150,160,210,0.28);
+    --violet: #8c7bff;
+    --violet-soft: #5d4fd6;
+    --cyan: #4fe0d4;
+    --red: #ff6b6b;
+    --text: #eceffb;
+    --muted: #8b93ad;
+    --muted-dim: #565f7a;
+
+    /* ---- added semantic tokens ---- */
+    --background: #050505;
+    --primary: var(--violet);      /* Fhenix-inspired purple */
+    --success: #4ADE80;            /* green */
+    --warning: #F5A623;            /* amber */
+    --danger: var(--red);          /* red */
+    --radius-lg: 22px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --topbar-h: 68px;
+    --bottomnav-h: 68px;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    background:
+      radial-gradient(ellipse 70% 50% at 18% -10%, rgba(140,123,255,0.16), transparent 60%),
+      radial-gradient(ellipse 60% 45% at 100% 8%, rgba(79,224,212,0.10), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: var(--font-display);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  body::before{
+    content:'';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 64px 64px;
+    opacity: 0.1;
+    mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, black 10%, transparent 75%);
+  }
+
+  body::after{
+    content:'';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  }
+
+  a{ color: inherit; text-decoration: none; }
+  button{ font-family: inherit; }
+  ::selection{ background: rgba(140,123,255,0.3); }
+
+  .wrap{ position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 0 28px; }
+  .wrap-narrow{ position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 28px; }
+
+  :focus-visible{ outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 4px; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+
+  /* ================= TOP BAR ================= */
+  .topbar{
+    position: sticky; top: 0; z-index: 40;
+    height: var(--topbar-h);
+    display:flex; align-items:center;
+    background: rgba(6,8,15,0.82);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner{
+    width: 100%;
+    display:flex; align-items:center; justify-content: space-between;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight: 600; font-size: 1.05rem; cursor:pointer; background:none; border:none; color:inherit; }
+  .brand-mark{ width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(135deg, var(--violet), var(--cyan)); flex-shrink: 0; }
+
+  .top-links{ display:flex; align-items:center; gap: 26px; font-size: 0.9rem; color: var(--muted); }
+  .top-links button{ background:none; border:none; color:inherit; cursor:pointer; font-size:inherit; padding: 6px 0; }
+  .top-links button:hover, .top-links button.active{ color: var(--text); }
+  .top-links button.active{ color: var(--cyan); }
+  @media (max-width: 860px){ .top-links{ display:none; } }
+
+  .top-right{ display:flex; align-items:center; gap: 14px; }
+
+  .wallet-btn{
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-size: 0.85rem; font-weight: 500;
+    background: linear-gradient(135deg, var(--violet), #6f5fe0);
+    color: #f5f4ff;
+    border: none; cursor: pointer;
+    display:flex; align-items:center; gap:8px;
+  }
+  .wallet-btn.connected{ background: var(--surface-strong); border: 1px solid var(--border-bright); color: var(--text); }
+  .wallet-btn .dot{ width:7px; height:7px; border-radius:50%; background: var(--cyan); }
+  .wallet-btn .dot.connecting{ background: var(--warning); animation: pulse-dot 0.9s ease-in-out infinite; }
+  @keyframes pulse-dot{ 0%,100%{ opacity:1; } 50%{ opacity:0.3; } }
+
+  .wallet-wrap{ position: relative; }
+  .network-badge{
+    display:inline-flex; align-items:center; gap:6px; font-family: var(--font-mono); font-size: 0.72rem;
+    color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 6px 11px;
+    border-radius: 999px; margin-right: 8px;
+  }
+  .network-badge .nd{ width:6px; height:6px; border-radius:50%; background: var(--success); flex-shrink:0; }
+  .network-badge.wrong{ color: var(--warning); border-color: rgba(245,166,35,0.35); }
+  .network-badge.wrong .nd{ background: var(--warning); }
+  @media (max-width: 560px){ .network-badge{ display:none; } }
+
+  .wallet-dropdown{
+    position:absolute; top: calc(100% + 8px); right: 0; z-index: 50; min-width: 200px;
+    background: var(--bg-alt); border: 1px solid var(--border-bright); border-radius: var(--radius-md);
+    box-shadow: 0 18px 40px -16px rgba(0,0,0,0.6); padding: 6px; display:none; flex-direction:column;
+  }
+  .wallet-dropdown.open{ display:flex; }
+  .wallet-dropdown-addr{ font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); padding: 10px 12px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .wallet-dropdown-balance{ font-size: 0.7rem; color: var(--muted-dim); margin-top: 4px; }
+  .wallet-btn:disabled{ opacity: 0.75; cursor: default; }
+  .wallet-dropdown button{ background:none; border:none; text-align:left; color: var(--text); font-family: var(--font-display); font-size: 0.88rem; padding: 10px 12px; border-radius: var(--radius-sm); cursor:pointer; display:flex; align-items:center; gap:8px; }
+  .wallet-dropdown button:hover{ background: var(--surface-strong); }
+  .wallet-dropdown button.danger{ color: var(--red); }
+
+  /* ---------- Spinners ---------- */
+  .spinner{
+    width: 15px; height: 15px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.25); border-top-color: currentColor;
+    animation: spin 0.7s linear infinite; display:inline-block; flex-shrink:0;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .btn-loading{ display:inline-flex; align-items:center; justify-content:center; gap: 9px; opacity: 0.85; cursor: default; pointer-events:none; }
+
+  /* ---------- Skeleton loading ---------- */
+  .skeleton{ position:relative; overflow:hidden; background: var(--surface-strong); border-radius: var(--radius-sm); }
+  .skeleton::after{
+    content:''; position:absolute; inset:0; transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
+    animation: shimmer 1.3s ease-in-out infinite;
+  }
+  @keyframes shimmer{ 100%{ transform: translateX(100%); } }
+  .skel-kpi{ height: 96px; }
+  .skel-panel{ height: 120px; margin-bottom: 24px; }
+  #dashboardSkeleton{ display:none; }
+  #dashboardSkeleton.show{ display:block; }
+  #dashboardContent{ display:block; }
+  #dashboardContent.hide{ display:none; }
+
+  /* ---------- Error / empty states ---------- */
+  .field-error{ color: var(--red); font-size: 0.78rem; font-family: var(--font-mono); margin-top: 6px; display:none; }
+  .form-field.has-error input, .form-field.has-error select{ border-color: var(--red); }
+  .form-field.has-error .field-error{ display:block; }
+  @keyframes shake{ 10%,90%{ transform: translateX(-1px);} 20%,80%{ transform: translateX(2px);} 30%,50%,70%{ transform: translateX(-4px);} 40%,60%{ transform: translateX(4px);} }
+  .shake{ animation: shake 0.5s; }
+
+  .banner{
+    display:flex; align-items:center; gap: 12px; padding: 13px 18px; border-radius: var(--radius-md);
+    font-size: 0.85rem; margin-bottom: 24px; border: 1px solid; display:none;
+  }
+  .banner.show{ display:flex; }
+  .banner-warning{ background: rgba(245,166,35,0.08); border-color: rgba(245,166,35,0.3); color: var(--warning); }
+  .banner-error{ background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.3); color: var(--red); }
+  .banner button{ margin-left:auto; background:none; border: 1px solid currentColor; color:inherit; font-family: var(--font-mono); font-size:0.76rem; padding: 6px 12px; border-radius: 999px; cursor:pointer; flex-shrink:0; }
+
+  .empty-state{ text-align:center; padding: 46px 20px; color: var(--muted); }
+  .empty-state .es-icon{ font-size: 1.6rem; margin-bottom: 12px; opacity:0.7; }
+  .empty-state .es-title{ color: var(--text); font-weight: 500; font-size: 0.95rem; margin-bottom: 6px; }
+  .empty-state .es-sub{ font-size: 0.83rem; }
+
+  .tx-fail{ text-align:center; padding: 10px 0; }
+  .tx-fail .fail-icon{ width: 56px; height: 56px; margin: 6px auto 16px; border-radius: 50%; background: rgba(255,107,107,0.12); border: 1px solid var(--red); color: var(--red); font-size: 1.6rem; display:flex; align-items:center; justify-content:center; }
+  .tx-fail .fail-title{ font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
+  .tx-fail .fail-sub{ color: var(--muted); font-size: 0.86rem; margin-bottom: 20px; }
+
+
+  .hamburger{
+    display:none;
+    width: 38px; height: 38px;
+    align-items:center; justify-content:center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 9px; cursor: pointer; color: var(--text);
+  }
+  @media (max-width: 860px){ .hamburger{ display:flex; } }
+
+  /* mobile drawer */
+  .mobile-menu{
+    position: fixed; inset: var(--topbar-h) 0 0 0; z-index: 39;
+    background: rgba(6,8,15,0.97);
+    backdrop-filter: blur(10px);
+    display: none;
+    flex-direction: column;
+    padding: 26px 28px;
+    gap: 4px;
+  }
+  .mobile-menu.open{ display:flex; }
+  .mobile-menu button{
+    background:none; border:none; text-align:left; color: var(--muted);
+    font-family: var(--font-display); font-size: 1.15rem; font-weight: 500;
+    padding: 16px 4px; border-bottom: 1px solid var(--border); cursor:pointer;
+  }
+  .mobile-menu button.active{ color: var(--cyan); }
+
+  /* ================= APP SUBNAV (desktop tabs) ================= */
+  .subnav{
+    position: sticky; top: var(--topbar-h); z-index: 30;
+    background: rgba(6,8,15,0.7);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    display: none;
+  }
+  .subnav.show{ display:block; }
+  @media (min-width: 861px){ .subnav{ display:none !important; } }
+  .subnav-inner{ display:flex; gap: 8px; overflow-x:auto; padding: 12px 0; scrollbar-width:none; }
+  .subnav-inner::-webkit-scrollbar{ display:none; }
+  .subnav-btn{
+    background:none; border: 1px solid transparent; color: var(--muted);
+    font-family: var(--font-mono); font-size: 0.82rem;
+    padding: 8px 16px; border-radius: 999px; cursor:pointer; white-space:nowrap;
+  }
+  .subnav-btn.active{ background: var(--surface-strong); border-color: var(--border-bright); color: var(--cyan); }
+
+  /* ================= APP SIDEBAR (desktop) ================= */
+  .app-sidebar{
+    display: none;
+    position: fixed; top: var(--topbar-h); left: 0; bottom: 0; z-index: 35;
+    width: 220px; padding: 26px 14px;
+    border-right: 1px solid var(--border);
+    background: rgba(10,14,27,0.55);
+    flex-direction: column; gap: 2px;
+  }
+  body.in-app .app-sidebar{ display: flex; }
+  @media (max-width: 860px){ .app-sidebar{ display: none !important; } }
+  @media (min-width: 861px){ body.in-app main{ margin-left: 220px; } body.in-app footer{ margin-left: 220px; } }
+  .sidebar-link{
+    display:flex; align-items:center; gap: 10px;
+    padding: 11px 14px; border-radius: var(--radius-sm);
+    background: none; border: 1px solid transparent; color: var(--muted);
+    font-size: 0.9rem; font-family: var(--font-display); cursor: pointer; text-align:left;
+  }
+  .sidebar-link:hover{ color: var(--text); }
+  .sidebar-link.active{ background: var(--surface-strong); border-color: var(--border-bright); color: var(--cyan); }
+  .sidebar-link .sl-dot{ width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.6; flex-shrink:0; }
+
+  /* ================= VIEWS ================= */
+  .view{ display:none; }
+  .view.active{ display:block; }
+  main{ padding-bottom: 40px; }
+  body.in-app main{ padding-bottom: calc(var(--bottomnav-h) + 30px); }
+  @media (min-width: 861px){ body.in-app main{ padding-bottom: 40px; } }
+
+  section{ position: relative; padding: 86px 0; border-top: 1px solid var(--border); }
+  .page-head{ padding: 46px 0 8px; }
+  .page-head h1{ font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 600; letter-spacing: -0.01em; }
+  .page-head p{ margin-top: 10px; color: var(--muted); max-width: 52ch; }
+
+  .section-head{ max-width: 60ch; margin-bottom: 52px; }
+  .section-head h2{ font-size: clamp(1.7rem, 3vw, 2.3rem); font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; }
+  .section-head p{ margin-top: 14px; color: var(--muted); font-size: 1.02rem; max-width: 52ch; }
+
+  /* ---------- Hero (landing) ---------- */
+  .hero{ position: relative; padding: 90px 0 90px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; border-top:none; }
+  @media (max-width: 860px){ .hero{ grid-template-columns: 1fr; padding: 60px 0 50px; } }
+  .powered-by{ display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 6px 14px 6px 10px; border-radius: 999px; margin-bottom: 26px; }
+  .powered-by strong{ color: var(--cyan); font-weight: 500; }
+  .powered-by::before{ content:''; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 0 3px rgba(79,224,212,0.18); flex-shrink:0; animation: pulse-dot 1.8s ease-in-out infinite; }
+  h1.display{ font-size: clamp(2.3rem, 5vw, 3.5rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.08; max-width: 14ch; }
+  .hero-sub{ margin-top: 22px; font-size: 1.08rem; color: var(--muted); max-width: 46ch; line-height: 1.6; }
+  .cta-row{ margin-top: 36px; display:flex; gap: 14px; flex-wrap: wrap; }
+
+  .btn{ padding: 13px 26px; border-radius: var(--radius-sm); font-size: 0.95rem; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease; display: inline-block; }
+  .btn:hover{ transform: translateY(-1px); }
+  .btn-primary{ background: linear-gradient(135deg, var(--violet), #6f5fe0); color: #f5f4ff; box-shadow: 0 0 0 1px rgba(140,123,255,0.3), 0 14px 30px -14px rgba(140,123,255,0.55); }
+  .btn-primary:hover{ box-shadow: 0 0 0 1px rgba(140,123,255,0.45), 0 18px 38px -14px rgba(140,123,255,0.75); }
+  .btn-ghost{ background: transparent; border-color: var(--border-bright); color: var(--text); }
+  .btn-ghost:hover{ border-color: var(--cyan); background: rgba(79,224,212,0.06); }
+
+  .hero-visual{ position: relative; aspect-ratio: 1 / 1; max-width: 360px; margin: 0 auto; }
+  .lattice{
+    width: 100%; height: 100%; display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+    padding: 18px; border-radius: var(--radius-lg);
+    background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+    position: relative;
+  }
+  .lattice::before{
+    content:''; position:absolute; inset:0; border-radius: inherit; padding: 1px;
+    background: linear-gradient(160deg, rgba(140,123,255,0.5), rgba(79,224,212,0.15), rgba(140,123,255,0.05));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events:none;
+  }
+  .cell{ aspect-ratio: 1; border-radius: 4px; background: rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; font-family: var(--font-mono); font-size: 0.55rem; color: var(--muted-dim); animation: scramble 3.6s ease-in-out infinite; }
+  @keyframes scramble{ 0%, 100%{ background: rgba(255,255,255,0.04); color: var(--muted-dim); } 45%{ background: rgba(140,123,255,0.16); color: var(--violet); } 55%{ background: rgba(79,224,212,0.14); color: var(--cyan); } }
+  .hero-visual .glow{ position:absolute; inset: -40px; background: radial-gradient(circle at 50% 50%, rgba(140,123,255,0.18), transparent 65%); z-index: -1; filter: blur(10px); }
+  .hero-visual .core{
+    position:absolute; top:50%; left:50%; transform: translate(-50%,-50%);
+    width: 64px; height: 64px; border-radius: 50%;
+    background: rgba(6,8,15,0.85); border: 1px solid var(--border-bright);
+    backdrop-filter: blur(6px);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 1.3rem; color: var(--cyan);
+    box-shadow: 0 0 0 8px rgba(6,8,15,0.55), 0 0 40px 4px rgba(79,224,212,0.25);
+  }
+
+  .products{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 860px){ .products{ grid-template-columns: 1fr; } }
+  .product-card{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 30px 26px; display:flex; flex-direction: column; gap: 14px; cursor:pointer; transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+  .product-card:hover{ border-color: var(--border-bright); transform: translateY(-3px); box-shadow: 0 24px 50px -28px rgba(140,123,255,0.4); }
+  .product-tag{ font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted-dim); }
+  .product-card h3{ font-size: 1.24rem; font-weight: 600; }
+  .product-card p{ color: var(--muted); font-size: 0.94rem; line-height: 1.55; }
+  .accent-bar{ width: 34px; height: 3px; border-radius: 2px; margin-bottom: 4px; }
+  .product-card:nth-child(1) .accent-bar{ background: var(--violet); }
+  .product-card:nth-child(2) .accent-bar{ background: var(--cyan); }
+  .product-card:nth-child(3) .accent-bar{ background: linear-gradient(90deg, var(--violet), var(--cyan)); }
+
+  .steps{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; }
+  @media (max-width: 860px){ .steps{ grid-template-columns: 1fr; gap: 28px; } .steps::before{ display:none; } }
+  .steps::before{ content:''; position:absolute; top: 19px; left: 6%; right: 6%; height: 1px; background: var(--border-bright); }
+  .step{ position: relative; padding-right: 20px; }
+  .step-index{ width: 38px; height: 38px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border-bright); display:flex; align-items:center; justify-content:center; font-family: var(--font-mono); font-size: 0.85rem; color: var(--cyan); margin-bottom: 18px; position: relative; z-index: 1; }
+  .step h4{ font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
+  .step p{ color: var(--muted); font-size: 0.9rem; line-height: 1.55; }
+
+  .built-grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  @media (max-width: 720px){ .built-grid{ grid-template-columns: 1fr; } }
+  .built-item{ background: var(--bg-alt); padding: 30px 28px; display:flex; align-items:flex-start; gap: 16px; }
+  .built-icon{ width: 34px; height: 34px; border-radius: 9px; background: var(--surface-strong); border: 1px solid var(--border-bright); flex-shrink: 0; display:flex; align-items:center; justify-content:center; font-family: var(--font-mono); font-size: 0.8rem; color: var(--violet); }
+  .built-item h4{ font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+  .built-item p{ color: var(--muted); font-size: 0.88rem; line-height: 1.5; }
+
+  .final-cta{ text-align: center; padding: 100px 0 60px; border-top: 1px solid var(--border); }
+  .final-cta h2{ font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 600; max-width: 20ch; margin: 0 auto 30px; line-height: 1.15; }
+
+  footer{ padding: 30px 0 50px; display:flex; justify-content: space-between; align-items: center; color: var(--muted-dim); font-size: 0.82rem; font-family: var(--font-mono); border-top: 1px solid var(--border); }
+  @media (max-width: 600px){ footer{ flex-direction: column; gap: 10px; text-align:center; } }
+
+  /* ================= APP UI KIT ================= */
+  .kpi-row{ display:grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin: 30px 0 42px; }
+  @media (max-width: 720px){ .kpi-row{ grid-template-columns: 1fr; } }
+  .kpi-card{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 22px 22px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
+  .kpi-label{ font-family: var(--font-mono); font-size: 0.74rem; color: var(--muted-dim); margin-bottom: 10px; display:flex; justify-content:space-between; align-items:center; }
+  .kpi-value{ font-size: 1.5rem; font-weight: 600; display:flex; align-items:center; gap:10px; }
+  .kpi-sub{ font-size: 0.82rem; color: var(--muted); margin-top: 6px; }
+
+  .reveal-toggle{
+    font-family: var(--font-mono); font-size: 0.66rem; color: var(--muted-dim);
+    background: var(--surface-strong); border: 1px solid var(--border-bright);
+    padding: 3px 9px; border-radius: 999px; cursor: pointer;
+  }
+  .reveal-toggle:hover{ color: var(--cyan); border-color: var(--cyan); }
+  .masked{ letter-spacing: 2px; }
+
+  .panel{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 26px; margin-bottom: 24px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
+  .panel-title{ font-size: 1.05rem; font-weight: 600; margin-bottom: 18px; display:flex; justify-content:space-between; align-items:center; }
+  .panel-title span.mono{ font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); font-weight: 400; }
+
+  .row-list{ display:flex; flex-direction:column; }
+  .row-item{ display:flex; align-items:center; justify-content:space-between; padding: 14px 0; border-bottom: 1px solid var(--border); gap: 14px; }
+  .row-item:last-child{ border-bottom:none; }
+  .row-left{ display:flex; align-items:center; gap: 14px; min-width:0; }
+  .row-icon{ width: 36px; height: 36px; border-radius: 10px; background: var(--surface-strong); border: 1px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family: var(--font-mono); font-size: 0.7rem; color: var(--cyan); }
+  .row-title{ font-size: 0.92rem; font-weight: 500; }
+  .row-sub{ font-size: 0.78rem; color: var(--muted-dim); font-family: var(--font-mono); }
+  .row-right{ text-align:right; flex-shrink:0; }
+  .row-value{ font-family: var(--font-mono); font-size: 0.92rem; }
+
+  .gauge-wrap{ display:flex; align-items:center; gap: 26px; flex-wrap:wrap; }
+  .gauge{ width: 130px; height: 130px; border-radius: 50%; background: conic-gradient(var(--cyan) 0deg, var(--cyan) var(--deg,252deg), var(--border) var(--deg,252deg)); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .gauge-inner{ width: 100px; height: 100px; border-radius: 50%; background: var(--bg-alt); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .gauge-inner .num{ font-size: 1.3rem; font-weight: 600; }
+  .gauge-inner .lbl{ font-family: var(--font-mono); font-size: 0.62rem; color: var(--muted-dim); }
+  .factor-list{ flex:1; min-width: 200px; display:flex; flex-direction:column; gap: 10px; }
+  .factor{ display:flex; justify-content:space-between; font-size: 0.86rem; color: var(--muted); }
+  .factor strong{ color: var(--text); font-weight: 500; }
+
+  .form-field{ margin-bottom: 18px; }
+  .form-field label{ display:block; font-family: var(--font-mono); font-size: 0.74rem; color: var(--muted); margin-bottom: 8px; }
+  .form-field input, .form-field select{
+    width: 100%; padding: 13px 15px; border-radius: var(--radius-sm);
+    background: var(--bg-alt); border: 1px solid var(--border-bright); color: var(--text);
+    font-family: var(--font-display); font-size: 0.95rem;
+  }
+  .form-field input:focus, .form-field select:focus{ outline: none; border-color: var(--cyan); }
+  .form-field input::placeholder{ color: var(--muted-dim); }
+
+  .pill-badge{ font-family: var(--font-mono); font-size: 0.68rem; padding: 3px 10px; border-radius: 999px; }
+  .pill-badge.ok{ color: var(--cyan); background: rgba(79,224,212,0.1); border: 1px solid rgba(79,224,212,0.3); }
+  .pill-badge.warn{ color: var(--red); background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); }
+  .pill-badge.neutral{ color: var(--violet); background: rgba(140,123,255,0.1); border: 1px solid rgba(140,123,255,0.3); }
+
+  .empty-hint{ color: var(--muted-dim); font-size: 0.85rem; text-align:center; padding: 30px 0; }
+
+  /* ---------- Encrypted status card ---------- */
+  .crypto-card{
+    background: var(--bg-alt);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius-lg);
+    padding: 24px 24px 20px;
+    max-width: 340px;
+    box-shadow: 0 20px 50px -30px rgba(140,123,255,0.5);
+  }
+  .crypto-card-head{
+    display:flex; align-items:center; gap:10px;
+    font-family: var(--font-mono); font-size: 0.76rem; letter-spacing: 0.04em;
+    color: var(--cyan); margin-bottom: 20px;
+  }
+  .crypto-card-head .lock{
+    width: 22px; height: 22px; border-radius: 6px;
+    background: rgba(79,224,212,0.12); border: 1px solid rgba(79,224,212,0.4);
+    display:flex; align-items:center; justify-content:center; font-size: 0.75rem;
+  }
+  .crypto-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 14px; }
+  .crypto-row .crypto-label{ font-size: 0.86rem; color: var(--muted); }
+  .crypto-bars{ display:flex; gap: 3px; }
+  .crypto-bars span{ width: 8px; height: 14px; border-radius: 2px; background: var(--surface-strong); border: 1px solid var(--border-bright); }
+  .crypto-row .crypto-risk{ font-family: var(--font-mono); font-size: 0.9rem; color: var(--text); }
+  .crypto-value-wrap{ display:flex; align-items:center; gap: 10px; }
+  .crypto-real{ font-family: var(--font-mono); font-size: 0.86rem; color: var(--cyan); }
+  .crypto-card-foot{
+    margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border);
+    display:flex; align-items:center; gap: 8px;
+    font-family: var(--font-mono); font-size: 0.74rem; color: var(--cyan);
+  }
+  .crypto-card-foot .check{
+    width: 16px; height: 16px; border-radius: 50%;
+    background: rgba(79,224,212,0.15); border: 1px solid var(--cyan);
+    display:flex; align-items:center; justify-content:center; font-size: 0.6rem;
+  }
+
+  /* ---------- Vertical flow diagram ---------- */
+  .flow-vertical{ display:flex; flex-direction:column; align-items:center; max-width: 260px; margin: 0 auto; }
+  .flow-node{
+    width: 100%; text-align:center;
+    padding: 13px 18px; border-radius: var(--radius-sm);
+    background: var(--surface); border: 1px solid var(--border-bright);
+    font-size: 0.9rem; font-weight: 500;
+  }
+  .flow-node.emphasis{ border-color: var(--cyan); color: var(--cyan); background: rgba(79,224,212,0.06); }
+  .flow-connector{ width: 1px; height: 22px; background: var(--border-bright); position: relative; }
+  .flow-connector::after{
+    content:''; position:absolute; bottom:-1px; left:50%; transform: translateX(-50%);
+    border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--border-bright);
+  }
+  .flow-pair{ display:flex; gap: 40px; justify-content:center; flex-wrap: wrap; margin-top: 10px; }
+  @media (max-width: 720px){ .flow-pair{ gap: 30px; } }
+
+  .arch-flow{ display:flex; flex-direction:column; align-items:center; max-width: 280px; margin: 0 auto; }
+  .arch-branches{ display:flex; gap: 12px; width: 100%; }
+  .arch-branches .flow-node{ padding: 10px 8px; font-size: 0.78rem; }
+  .flow-node.small{ flex: 1; }
+
+  /* ---------- Numbered step flow (vertical) ---------- */
+  .step-flow{ display:flex; flex-direction:column; align-items:center; max-width: 360px; margin: 0 auto; }
+  .step-flow-node{ width: 100%; padding: 20px 24px; border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--border); text-align:center; }
+  .step-flow-node .sf-num{ font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted-dim); letter-spacing: 0.08em; }
+  .step-flow-node .sf-title{ font-family: var(--font-mono); font-size: 1rem; font-weight: 600; color: var(--cyan); margin: 6px 0 8px; letter-spacing: 0.03em; }
+  .step-flow-node .sf-desc{ font-size: 0.86rem; color: var(--muted); line-height: 1.5; }
+  .step-flow-node.sf-final{ border-color: var(--cyan); background: rgba(79,224,212,0.06); }
+  .step-flow-node.sf-final .sf-title{ color: var(--text); }
+  .step-flow .flow-connector{ margin: 4px 0; }
+
+  /* ---------- Credit verification card ---------- */
+  .verify-card{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; max-width: 360px; }
+  .verify-row{ display:flex; align-items:center; justify-content:space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .verify-row:last-child{ border-bottom:none; }
+  .verify-row .vr-label{ font-size: 0.9rem; color: var(--muted); }
+  .verify-row .vr-value{ font-family: var(--font-mono); font-size: 0.92rem; display:flex; align-items:center; gap: 8px; }
+  .verify-check{ color: var(--cyan); }
+
+  /* ---------- Privacy progress bar ---------- */
+  .privacy-bar{ width: 100%; height: 10px; border-radius: 999px; background: var(--surface-strong); border: 1px solid var(--border); overflow: hidden; }
+  .privacy-fill{ height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--violet), var(--cyan)); }
+
+  /* ---------- Simple status list ---------- */
+  .status-list{ display:flex; flex-direction:column; }
+  .status-row{ display:flex; align-items:center; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--border); }
+  .status-row:last-child{ border-bottom:none; }
+  .status-type{ font-size: 0.9rem; font-weight: 500; flex: 1; }
+  .status-tag{ font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); }
+  .status-check{ color: var(--cyan); font-size: 0.9rem; width: 18px; text-align:center; }
+  .status-date{ font-family: var(--font-mono); font-size: 0.76rem; color: var(--muted-dim); flex-shrink:0; margin-left:8px; }
+
+  /* ---------- Metric cards (stat row) ---------- */
+  .metric-row{ display:grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin: 30px 0; }
+  @media (max-width: 720px){ .metric-row{ grid-template-columns: 1fr; } }
+  .metric-card{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 22px; display:flex; flex-direction:column; gap: 10px; align-items:flex-start; }
+  .metric-label{ font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.05em; color: var(--muted-dim); }
+  .metric-value{ font-size: 1.7rem; font-weight: 600; }
+
+  /* ---------- Risk slider ---------- */
+  .risk-slider{ display:flex; align-items:center; gap: 14px; }
+  .rs-end{ font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted-dim); flex-shrink:0; }
+  .rs-track{ position:relative; flex:1; height: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--red)); }
+  .rs-marker{ position:absolute; top:50%; width: 16px; height: 16px; border-radius: 50%; background: var(--text); border: 3px solid var(--bg); transform: translate(-50%,-50%); box-shadow: 0 0 0 1px var(--border-bright); }
+
+  /* ---------- Pay tabs / receive / success ---------- */
+  .tab-toggle{ display:flex; gap: 6px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 999px; padding: 4px; margin-bottom: 24px; }
+  .tab-btn{ flex:1; background:none; border:none; color: var(--muted); padding: 9px 0; border-radius: 999px; font-family: var(--font-display); font-size: 0.88rem; font-weight: 500; cursor:pointer; }
+  .tab-btn.active{ background: var(--surface-strong); color: var(--text); }
+  .receive-box{ text-align:center; padding: 20px 0 6px; }
+  .receive-qr{ width: 140px; height: 140px; margin: 0 auto; border-radius: var(--radius-md); background: var(--surface-strong); border: 1px solid var(--border-bright); display:grid; grid-template-columns: repeat(9,1fr); gap: 2px; padding: 10px; }
+  .receive-qr span{ background: var(--muted-dim); border-radius: 1px; }
+  .receive-qr span.on{ background: var(--text); }
+  .success-check{ width: 56px; height: 56px; margin: 6px auto 16px; border-radius: 50%; background: rgba(79,224,212,0.12); border: 1px solid var(--cyan); color: var(--cyan); font-size: 1.6rem; display:flex; align-items:center; justify-content:center; }
+  .success-title{ text-align:center; font-size: 1.2rem; font-weight: 600; }
+
+  /* ---------- Private credit score display ---------- */
+  .score-display{ text-align:center; padding: 10px 0 4px; }
+  .score-label{ font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.08em; color: var(--muted-dim); margin-bottom: 14px; }
+  .score-big{ font-size: 3.2rem; font-weight: 700; letter-spacing: -0.02em; }
+  .score-rating{ font-family: var(--font-mono); font-size: 0.82rem; letter-spacing: 0.06em; color: var(--cyan); margin: 8px 0 16px; }
+
+  /* ---------- Credit score history chart ---------- */
+  .chart-card{ position: relative; }
+  .chart-card.blurred .chart-svg-wrap{ filter: blur(7px); pointer-events: none; user-select: none; }
+  .chart-svg-wrap{ transition: filter 0.35s ease; }
+  .chart-lock-overlay{
+    position:absolute; inset: 0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 10px;
+    z-index: 2; text-align:center; padding: 0 20px;
+  }
+  .chart-lock-overlay .lock-icon{ font-size: 1.3rem; }
+  .chart-lock-overlay p{ font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); }
+  .chart-axis-row{ display:flex; justify-content:space-between; margin-top: 10px; padding: 0 2px; }
+  .chart-axis-label{ font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted-dim); }
+  .chart-point{ cursor: pointer; }
+  .chart-point circle{ transition: r 0.15s ease; }
+  .chart-point:hover circle, .chart-point.active circle{ r: 5.5; }
+  .chart-tooltip{
+    position:absolute; z-index: 3; transform: translate(-50%, -100%);
+    background: var(--bg-alt); border: 1px solid var(--border-bright); border-radius: var(--radius-sm);
+    padding: 6px 11px; font-family: var(--font-mono); font-size: 0.72rem; white-space:nowrap;
+    pointer-events:none; opacity: 0; transition: opacity 0.12s ease; box-shadow: 0 10px 24px -12px rgba(0,0,0,0.6);
+  }
+  .chart-tooltip.show{ opacity: 1; }
+  .chart-tooltip .tt-month{ color: var(--muted); margin-right: 6px; }
+  .chart-tooltip .tt-score{ color: var(--cyan); font-weight: 500; }
+  .chart-delta{ display:inline-flex; align-items:center; gap:5px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--success); }
+
+  /* ---------- Activity feed ---------- */
+  .feed-list{ display:flex; flex-direction:column; }
+  .feed-item{ display:flex; align-items:flex-start; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .feed-item:last-child{ border-bottom:none; }
+  .feed-icon{ font-size: 1.15rem; width: 30px; text-align:center; flex-shrink:0; }
+  .feed-body{ flex:1; min-width:0; }
+  .feed-title{ font-size: 0.94rem; font-weight: 500; }
+  .feed-sub{ font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+  .feed-date{ font-family: var(--font-mono); font-size: 0.76rem; color: var(--muted-dim); flex-shrink:0; }
+
+  /* Docs */
+  .docs-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+  @media (max-width:720px){ .docs-grid{ grid-template-columns:1fr; } }
+  .doc-card{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 22px; }
+  .doc-card .tag{ font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted-dim); margin-bottom: 10px; display:block; }
+  .doc-card h4{ font-size: 1.02rem; font-weight: 600; margin-bottom: 8px; }
+  .doc-card p{ color: var(--muted); font-size: 0.88rem; }
+
+  .docs-layout{ display:grid; grid-template-columns: 200px 1fr; gap: 36px; }
+  @media (max-width: 720px){ .docs-layout{ grid-template-columns: 1fr; } }
+  .docs-sidebar{ display:flex; flex-direction:column; gap: 2px; }
+  @media (max-width: 720px){ .docs-sidebar{ flex-direction:row; overflow-x:auto; gap:6px; padding-bottom: 8px; } }
+  .doc-link{ background:none; border: 1px solid transparent; color: var(--muted); text-align:left; padding: 9px 12px; border-radius: var(--radius-sm); font-family: var(--font-display); font-size: 0.88rem; cursor:pointer; white-space:nowrap; }
+  .doc-link:hover{ color: var(--text); }
+  .doc-link.active{ background: var(--surface-strong); border-color: var(--border-bright); color: var(--cyan); }
+  .docs-content h3{ font-size: 1.3rem; font-weight: 600; margin-bottom: 12px; }
+  .docs-content p{ color: var(--muted); font-size: 0.95rem; line-height: 1.65; max-width: 56ch; }
+
+  /* About */
+  .values-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-top: 20px; }
+  @media (max-width:720px){ .values-grid{ grid-template-columns:1fr; } }
+  .value-item{ padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+  .value-item h4{ font-size: 0.98rem; margin-bottom: 8px; }
+  .value-item p{ color: var(--muted); font-size: 0.86rem; }
+
+  /* ================= BOTTOM NAV (mobile app) ================= */
+  .bottom-nav{
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+    height: var(--bottomnav-h);
+    background: rgba(10,14,27,0.92);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid var(--border);
+    display: none;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 6px;
+  }
+  body.in-app .bottom-nav{ display: flex; }
+  @media (min-width: 861px){ .bottom-nav{ display:none !important; } }
+  .bn-item{
+    background:none; border:none; color: var(--muted-dim); cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    font-family: var(--font-mono); font-size: 0.62rem;
+    flex: 1; padding: 8px 0;
+  }
+  .bn-item.active{ color: var(--cyan); }
+  .bn-icon{ width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid currentColor; }
+  .bn-fab{
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--violet), var(--cyan));
+    color: #06080f; border: none; cursor: pointer;
+    font-size: 1.4rem; font-weight: 600;
+    display:flex; align-items:center; justify-content:center;
+    margin-top: -26px;
+    box-shadow: 0 10px 24px -8px rgba(140,123,255,0.6);
+    flex: 0 0 50px;
+  }
+
+  /* ================= ADD FUNDS MODAL ================= */
+  .modal-backdrop{
+    position: fixed; inset:0; z-index: 60;
+    background: rgba(4,5,10,0.7);
+    backdrop-filter: blur(4px);
+    display:none; align-items:flex-end; justify-content:center;
+  }
+  .modal-backdrop.open{ display:flex; }
+  @media (min-width: 600px){ .modal-backdrop{ align-items:center; } }
+  .modal-sheet{
+    width: 100%; max-width: 440px;
+    background: var(--bg-alt); border: 1px solid var(--border-bright);
+    border-radius: 22px 22px 0 0;
+    padding: 26px 24px calc(26px + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 600px){ .modal-sheet{ border-radius: 22px; } }
+  .modal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px; }
+  .modal-head h3{ font-size: 1.1rem; font-weight: 600; }
+  .modal-close{ background:none; border:none; color: var(--muted); font-size: 1.2rem; cursor:pointer; }
+  .step-track{ font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted-dim); margin-bottom: 22px; }
+  .step-track strong{ color: var(--cyan); }
+  .asset-list{ display:flex; flex-direction:column; gap:8px; margin-bottom: 22px; }
+  .asset-opt{ display:flex; align-items:center; gap:12px; padding: 13px 14px; border: 1px solid var(--border-bright); border-radius: var(--radius-sm); cursor:pointer; background: var(--bg); }
+  .asset-opt.selected{ border-color: var(--cyan); background: rgba(79,224,212,0.06); }
+  .asset-dot{ width:22px; height:22px; border-radius:50%; background: linear-gradient(135deg, var(--violet), var(--cyan)); }
+  .modal-actions{ display:flex; gap: 10px; margin-top: 6px; }
+  .modal-actions .btn{ flex:1; text-align:center; }
+  .confirm-summary{ background: var(--bg); border:1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; font-size: 0.88rem; color: var(--muted); display:flex; flex-direction:column; gap:8px; margin-bottom: 20px; }
+  .confirm-summary strong{ color: var(--text); }
+
+  /* ================= WALLET CONNECT MODAL ================= */
+  .wallet-opt-list{ display:flex; flex-direction:column; gap:8px; margin-bottom: 6px; }
+  .wallet-opt{
+    display:flex; align-items:center; gap:12px; padding: 13px 14px;
+    border: 1px solid var(--border-bright); border-radius: var(--radius-sm);
+    cursor:pointer; background: var(--bg); text-align:left; width:100%;
+    color: var(--text); font-family: var(--font-display); font-size: 0.92rem;
+  }
+  .wallet-opt:hover{ border-color: var(--cyan); background: rgba(79,224,212,0.06); }
+  .wallet-opt:disabled{ opacity:0.45; cursor:not-allowed; }
+  .wallet-opt:disabled:hover{ border-color: var(--border-bright); background: var(--bg); }
+  .wallet-opt-icon{
+    width:34px; height:34px; border-radius:10px; flex-shrink:0;
+    background: linear-gradient(135deg, var(--violet), var(--cyan));
+    display:flex; align-items:center; justify-content:center;
+    font-size:1rem; overflow:hidden;
+  }
+  .wallet-opt-icon img{ width:100%; height:100%; object-fit:contain; }
+  .wallet-opt-name{ font-weight:500; }
+  .wallet-opt-sub{ font-size:0.74rem; color: var(--muted-dim); margin-top:2px; }
+  .wallet-opt-tag{ margin-left:auto; font-family: var(--font-mono); font-size:0.68rem; color: var(--muted-dim); border:1px solid var(--border); padding:3px 8px; border-radius:999px; }
+  .wallet-opt-tag.installed{ color: var(--success); border-color: rgba(74,222,128,0.35); }
+  .wallet-confirm-box{ background: var(--bg); border:1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; display:flex; align-items:center; gap:12px; margin-bottom: 18px; }
+  .wallet-confirm-box .wallet-opt-icon{ width:40px; height:40px; }
+  .wallet-confirm-note{ font-size: 0.8rem; color: var(--muted); line-height:1.5; margin-bottom: 20px; }
+
+.status-text{font-size:12px;opacity:.85}.status-text.ok{color:#7ee2a8}.status-text.warn{color:#ffcf70}
+
+  /* ---------- Encrypt Lab ---------- */
+  .source-badge{font-family:var(--font-mono);font-size:.66rem;padding:3px 8px;border:1px solid var(--border);border-radius:999px;color:var(--muted);background:var(--surface);white-space:nowrap}
+  .source-badge.live{color:var(--cyan);border-color:rgba(79,224,212,.3)}
+  .source-badge.warn{color:var(--warning);border-color:rgba(245,166,35,.3)}
+  .lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:760px){.lab-grid{grid-template-columns:1fr}}
+  .lab-output{font-family:var(--font-mono);font-size:.78rem;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;word-break:break-all;min-height:74px}
+  .lab-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:center}
+  @media(max-width:760px){.lab-flow{grid-template-columns:1fr}}
+  .lab-flow .flow-node{font-size:.78rem}
+  .data-source{margin-top:8px;font-family:var(--font-mono);font-size:.68rem;color:var(--muted-dim)}
+  .unavailable{color:var(--muted);font-family:var(--font-mono);font-size:.78rem}
+  .metric-value.unavailable{font-size:1rem}
+</style>
+
+<script id="ciphershield-single-file-config">
+window.CIPHERSHIELD_SINGLE_FILE = {
+  backendUrl: "",
+  contracts: { fheRisk: "", fheCredit: "", payment: "" },
+  supportedTokens: {
+    USDC: { address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", decimals: 6 }
+  }
+};
+</script>
+
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-inner">
+    <button class="brand" data-nav="home"><span class="brand-mark"></span>CipherShield</button>
+    <div class="top-links">
+      <button data-nav="home">Home</button>
+      <button data-nav="app-dashboard" data-group="app">App</button>
+      <button data-nav="technology">Technology</button>
+      <button data-nav="docs">Docs</button>
+      <button data-nav="about">About</button>
+    </div>
+    <div class="top-right">
+      <span class="network-badge" id="networkBadge" style="display:none;"><span class="nd"></span><span id="networkBadgeText">Sepolia</span></span>
+      <div class="wallet-wrap">
+        <button class="wallet-btn" id="walletBtn"><span class="dot" style="display:none"></span><span id="walletLabel">Connect Wallet</span></button>
+        <div class="wallet-dropdown" id="walletDropdown">
+          <div class="wallet-dropdown-addr">
+            <div id="walletDropdownAddr">Not connected</div>
+            <div class="wallet-dropdown-balance" id="walletDropdownBalance"></div>
+          </div>
+          <button id="copyAddrMenuBtn">📋 Copy address</button>
+          <button class="danger" id="disconnectBtn">⏻ Disconnect</button>
+        </div>
+      </div>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</div>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button data-nav="home">Home</button>
+  <button data-nav="app-dashboard" data-group="app">App</button>
+  <button data-nav="technology">Technology</button>
+  <button data-nav="docs">Docs</button>
+  <button data-nav="about">About</button>
+</div>
+
+<div class="subnav" id="appSubnav">
+  <div class="wrap subnav-inner">
+    <button class="subnav-btn" data-nav="app-dashboard">Dashboard</button>
+    <button class="subnav-btn" data-nav="app-risk">CipherRisk</button>
+    <button class="subnav-btn" data-nav="app-pay">ShieldPay</button>
+    <button class="subnav-btn" data-nav="app-credit">Private Credit</button>
+    <button class="subnav-btn" data-nav="app-encrypt">Encrypt Lab</button>
+    <button class="subnav-btn" data-nav="app-activity">Activity</button>
+  </div>
+</div>
+
+<div class="app-sidebar" id="appSidebar">
+  <button class="sidebar-link" data-nav="app-dashboard"><span class="sl-dot"></span>Dashboard</button>
+  <button class="sidebar-link" data-nav="app-risk"><span class="sl-dot"></span>Risk</button>
+  <button class="sidebar-link" data-nav="app-pay"><span class="sl-dot"></span>Pay</button>
+  <button class="sidebar-link" data-nav="app-credit"><span class="sl-dot"></span>Credit</button>
+  <button class="sidebar-link" data-nav="app-encrypt"><span class="sl-dot"></span>Encrypt Lab</button>
+  <button class="sidebar-link" data-nav="app-activity"><span class="sl-dot"></span>Activity</button>
+</div>
+
+
+<main>
+
+  <!-- ============ HOME / LANDING ============ -->
+  <div class="view" data-view="home">
+    <section class="hero wrap">
+      <div>
+        <span class="powered-by">Powered by <strong>Fhenix</strong> · Testnet prototype</span>
+        <h1 class="display">Private finance, without public exposure.</h1>
+        <p class="hero-sub">Your balances, trades, and credit history shouldn't be readable by anyone with a block explorer. CipherShield keeps them encrypted end to end, even while they're being computed on.</p>
+        <div class="cta-row">
+          <button class="btn btn-primary" data-nav="app-dashboard">Launch App</button>
+          <button class="btn btn-ghost" data-nav="technology">Explore Technology</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="glow"></div>
+        <div class="lattice" id="lattice"></div>
+        <div class="core" aria-hidden="true">🔒</div>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <div class="section-head">
+        <h2>Onchain shouldn't mean visible to everyone.</h2>
+        <p>Every wallet balance, every trade size, every credit history sits in the open today. Competitors watch your positions. Counterparties front-run your trades. Lenders profile you from a public address. CipherShield closes that gap.</p>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <div class="section-head">
+        <h2>Three products, one guarantee: your data stays yours.</h2>
+        <p>Each is built on the same encrypted core, so the privacy is never bolted on after the fact.</p>
+      </div>
+      <div class="products">
+        <div class="product-card" data-nav="app-risk">
+          <span class="accent-bar"></span>
+          <span class="product-tag">01 — Risk</span>
+          <h3>CipherRisk</h3>
+          <p>Model exposure and liquidation thresholds across your DeFi positions without ever putting position sizes on public display.</p>
+        </div>
+        <div class="product-card" data-nav="app-pay">
+          <span class="accent-bar"></span>
+          <span class="product-tag">02 — Payments</span>
+          <h3>ShieldPay</h3>
+          <p>Send real Sepolia payments and index them through ShieldPayLedger events.</p>
+        </div>
+        <div class="product-card" data-nav="app-credit">
+          <span class="accent-bar"></span>
+          <span class="product-tag">03 — Credit</span>
+          <h3>Private Credit</h3>
+          <p>Build a portable encrypted credit result from supported repayment data, computed without exposing the underlying data.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta wrap">
+      <h2>Bring your finances onchain without bringing them into public view.</h2>
+      <button class="btn btn-primary" data-nav="app-dashboard">Launch CipherShield</button>
+    </section>
+  </div>
+
+  <!-- ============ APP: DASHBOARD ============ -->
+  <div class="view" data-view="app-dashboard">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Welcome back</h1>
+        <p><span id="walletInlineLabel">Connect your wallet</span> — here's your position at a glance.</p>
+        <p class="kpi-sub" style="margin-top:4px;">Live Sepolia wallet data. Risk and credit load from deployed CipherShield contracts when configured.</p>
+      </div>
+
+      <div class="banner banner-warning" id="wrongNetworkBanner">
+        <span>⚠️</span>
+        <span>Wrong network detected — CipherShield runs on Sepolia testnet.</span>
+        <button id="switchNetworkBtn">Switch network</button>
+      </div>
+
+      <div class="empty-state" id="dashboardNotConnected" style="display:none;">
+        <div class="es-icon">🔌</div>
+        <div class="es-title">Connect your wallet to view your dashboard</div>
+        <div class="es-sub">Risk, credit, and balance data are tied to your connected wallet.</div>
+        <div class="cta-row" style="justify-content:center; margin-top:18px;">
+          <button class="btn btn-primary" id="dashboardConnectBtn">Connect Wallet</button>
+        </div>
+      </div>
+
+      <div id="dashboardSkeleton">
+        <div class="kpi-row">
+          <div class="kpi-card skeleton skel-kpi"></div>
+          <div class="kpi-card skeleton skel-kpi"></div>
+          <div class="kpi-card skeleton skel-kpi"></div>
+        </div>
+        <div class="panel skeleton skel-panel"></div>
+        <div class="panel skeleton skel-panel" style="height:200px;"></div>
+      </div>
+
+      <div id="dashboardContent">
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Risk</div>
+          <div class="kpi-value"><span class="pill-badge" id="dashRiskBadge">—</span></div>
+          <div class="kpi-sub" id="dashRiskSub">Connect wallet to load risk</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Credit</div>
+          <div class="kpi-value" id="dashCreditValue">—</div>
+          <div class="kpi-sub" id="dashCreditSub">Fhenix / CoFHE encrypted state only</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Wallet Balance</div>
+          <div class="kpi-value" id="dashBalanceValue">—</div>
+          <div class="kpi-sub" id="dashBalanceSub">Live Sepolia ETH + USDC</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Wallet & Privacy Status <span class="source-badge live">LIVE</span></div>
+        <div class="status-list">
+          <div class="status-row"><span class="status-type">Address</span><span class="status-tag" id="dashWalletAddress">Data unavailable</span></div>
+          <div class="status-row"><span class="status-type">Network</span><span class="status-tag" id="dashNetwork">Data unavailable</span></div>
+          <div class="status-row"><span class="status-type">Native balance</span><span class="status-tag" id="dashNativeBalance">Data unavailable</span></div>
+          <div class="status-row"><span class="status-type">USDC balance</span><span class="status-tag" id="dashUsdcBalance">Data unavailable</span></div>
+          <div class="status-row"><span class="status-type">Fhenix / CoFHE</span><span class="status-tag" id="dashCofheStatus">Checking…</span></div>
+        </div>
+      </div>
+
+      <div class="crypto-card" style="margin-bottom: 30px;">
+        <div class="crypto-card-head"><span class="lock">🔒</span>ENCRYPTED</div>
+        <div class="crypto-row">
+          <span class="crypto-label">Balance</span>
+          <div class="crypto-value-wrap">
+            <div class="crypto-bars" data-bars="bal"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <span class="crypto-real" data-bars-real="bal" id="cryptoBalanceReal" style="display:none;"></span>
+            <button class="reveal-toggle" data-reveal-bars="bal">Reveal</button>
+          </div>
+        </div>
+        <div class="crypto-row">
+          <span class="crypto-label">Debt</span>
+          <div class="crypto-value-wrap">
+            <div class="crypto-bars" data-bars="debt"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <span class="crypto-real" data-bars-real="debt" id="cryptoDebtReal" style="display:none;"></span>
+            <button class="reveal-toggle" data-reveal-bars="debt">Reveal</button>
+          </div>
+        </div>
+        <div class="crypto-row" style="margin-bottom:0;">
+          <span class="crypto-label">Risk</span>
+          <span class="crypto-risk" id="cryptoRiskValue">—</span>
+        </div>
+        <div class="crypto-card-foot"><span class="check">✓</span><span id="cryptoStatusText">Live wallet data; confidential contract data loads when deployed.</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Quick actions <span class="mono">encrypted client-side</span></div>
+        <div class="cta-row" style="margin-top:0;">
+          <button class="btn btn-primary" id="openAddFunds">Add funds</button>
+          <button class="btn btn-ghost" data-nav="app-pay">Send payment</button>
+          <button class="btn btn-ghost" data-nav="app-risk">View risk</button>
+        </div>
+      </div>
+
+
+      <div class="panel">
+        <div class="panel-title">Recent activity</div>
+        <div class="status-list" id="dashboardRecentActivity"></div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============ APP: CIPHERRISK ============ -->
+  <div class="view" data-view="app-risk">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Your position is encrypted.<br>Your risk doesn't have to be.</h1>
+        <p>CipherRisk computes your exposure without ever revealing your position sizes.</p>
+        <div class="cta-row">
+          <button class="btn btn-primary" id="analyzeBtn">Analyze Position</button>
+        </div>
+        <p class="kpi-sub" style="margin-top:14px;">CipherRisk is calculated only from deployed encrypted position state. If no supported encrypted position exists, the app reports insufficient data instead of estimating a score.</p>
+      </div>
+
+      <div class="panel" id="analyzingPanel" style="display:none;">
+        <div class="panel-title" id="analyzingTitle">Analyzing private financial data...</div>
+        <div class="privacy-bar"><div class="privacy-fill" id="analyzeProgress" style="width:0%"></div></div>
+        <div class="kpi-sub" id="analyzePct" style="margin:8px 0 18px;">0%</div>
+        <div class="status-list">
+          <div class="status-row"><span class="status-type">Encryption</span><span class="status-check" id="chk-enc"></span></div>
+          <div class="status-row"><span class="status-type">Collateral</span><span class="status-check" id="chk-col"></span></div>
+          <div class="status-row"><span class="status-type">Debt ratio</span><span class="status-check" id="chk-debt"></span></div>
+          <div class="status-row"><span class="status-type">Risk analysis</span><span class="status-check" id="chk-risk"></span></div>
+        </div>
+      </div>
+
+      <div class="empty-state" id="riskEmptyState">
+        <div class="es-icon">🔒</div>
+        <div class="es-title" id="riskEmptyTitle">No analysis yet</div>
+        <div class="es-sub" id="riskEmptySub">Connect your wallet and run Analyze Position to compute your encrypted risk metrics.</div>
+      </div>
+
+      <div id="riskResults" style="display:none;">
+      <div class="metric-row">
+        <div class="metric-card">
+          <div class="metric-label">HEALTH FACTOR</div>
+          <div class="metric-value" id="riskHealthFactor">—</div>
+          <span class="pill-badge ok">LOW RISK</span>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">LTV</div>
+          <div class="metric-value" id="riskLtv">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">LIQUIDATION RISK</div>
+          <div class="metric-value" id="riskLiquidation">—</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Encrypted inputs <span class="source-badge" id="riskInputSource">ENCRYPTED STATE</span></div>
+        <div class="status-list">
+          <div class="status-row"><span class="status-type">Collateral</span><span class="status-tag">🔒 Encrypted</span></div>
+          <div class="status-row"><span class="status-type">Debt</span><span class="status-tag">🔒 Encrypted</span></div>
+          <div class="status-row"><span class="status-type">Interest</span><span class="status-tag">🔒 Encrypted</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Risk level</div>
+        <div class="risk-slider">
+          <span class="rs-end">LOW</span>
+          <div class="rs-track"><div class="rs-marker" id="riskSliderMarker" style="left:0%"></div></div>
+          <span class="rs-end">HIGH</span>
+        </div>
+        <div class="kpi-sub" id="riskSliderValue" style="text-align:center; margin-top:10px;">—</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Verification <span class="source-badge" id="riskVerificationSource">Fhenix / CoFHE</span></div>
+        <div class="status-list">
+          <div class="status-row"><span class="status-check">🔐</span><span class="status-type">Position encrypted</span></div>
+          <div class="status-row"><span class="status-check">✓</span><span class="status-type">Computation completed</span></div>
+          <div class="status-row"><span class="status-check">✓</span><span class="status-type">Result verified</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">How your risk score is derived</div>
+        <div class="flow-vertical">
+          <div class="flow-node">Wallet</div>
+          <div class="flow-connector"></div>
+          <div class="flow-node">Balance</div>
+          <div class="flow-connector"></div>
+          <div class="flow-node">Debt</div>
+          <div class="flow-connector"></div>
+          <div class="flow-node">Transactions</div>
+          <div class="flow-connector"></div>
+          <div class="flow-node emphasis">Risk</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Positions <span class="mono" id="riskPositionsSourceTag">amounts encrypted</span></div>
+        <div class="row-list">
+          <div class="row-item">
+            <div class="row-left"><div class="row-icon">ETH</div><div><div class="row-title">Supplied — ETH</div><div class="row-sub">Collateral</div></div></div>
+            <div class="row-right"><span class="status-tag" id="riskPosEth">🔒 Contract value</span></div>
+          </div>
+          <div class="row-item">
+            <div class="row-left"><div class="row-icon">USD</div><div><div class="row-title">Supplied — USDC</div><div class="row-sub">Collateral</div></div></div>
+            <div class="row-right"><span class="status-tag" id="riskPosUsdc">🔒 Contract value</span></div>
+          </div>
+          <div class="row-item">
+            <div class="row-left"><div class="row-icon">DEBT</div><div><div class="row-title">Borrowed</div><div class="row-sub">Debt</div></div></div>
+            <div class="row-right"><span class="status-tag" id="riskPosDebt">🔒 Contract value</span></div>
+          </div>
+
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ APP: SHIELDPAY ============ -->
+  <div class="view" data-view="app-pay">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>ShieldPay</h1>
+        <p>Send real Sepolia payments and keep an indexed application history.</p>
+        <p class="kpi-sub" style="margin-top:4px;">ETH and Sepolia USDC sends are real wallet transactions. CipherRisk and Private Credit use Fhenix CoFHE encrypted state; normal ETH/USDC transfers remain public on-chain.</p>
+      </div>
+
+      <div class="panel">
+        <div class="tab-toggle">
+          <button class="tab-btn active" data-paytab="send">Send</button>
+          <button class="tab-btn" data-paytab="receive">Receive</button>
+        </div>
+
+        <div id="payFormWrap">
+          <div class="form-field" id="payRecipientField">
+            <label>Recipient</label>
+            <input type="text" id="payRecipient" placeholder="0x________________">
+            <div class="field-error" id="payRecipientError">Enter a valid address starting with 0x.</div>
+          </div>
+          <div class="form-field" id="payAmountField">
+            <label>Amount</label>
+            <input type="text" id="payAmount" placeholder="🔒 Enter amount">
+            <div class="field-error" id="payAmountError">Enter an amount greater than 0.</div>
+          </div>
+          <div class="form-field">
+            <label>Asset</label>
+            <select id="payAsset"><option>USDC</option><option>ETH</option><option>wBTC</option></select>
+            <div class="kpi-sub" style="margin-top:6px;">ETH and Sepolia USDC use real wallet transactions and are logged to ShieldPayLedger for indexing. wBTC remains disabled. Native ETH/ERC-20 transfer details are public on Sepolia.</div>
+          </div>
+          <div class="form-field">
+            <label>Message</label>
+            <input type="text" placeholder="Optional">
+          </div>
+          <div class="form-field" style="display:flex; align-items:center; gap:10px; flex-direction:row;">
+            <input type="checkbox" id="payEncryptToggle" style="width:16px; height:16px; accent-color: var(--violet); margin:0;">
+            <label for="payEncryptToggle" style="margin:0; cursor:pointer;">🔒 Encrypt amount with Fhenix CoFHE</label>
+          </div>
+          <div class="kpi-sub" id="payEncryptNote" style="margin:-6px 0 10px; display:none;">
+            The amount is encrypted client-side with the real @cofhe/sdk and only you can decrypt it back in this app's history. The underlying Sepolia USDC/ETH transfer is still a standard public ERC-20/native transfer — that part is visible on a block explorer like any normal wallet transaction, encryption here does not hide it on-chain.
+          </div>
+          <button class="btn btn-primary" style="width:100%; text-align:center;" id="encryptSendBtn">Send</button>
+        </div>
+
+        <div id="payReceiveWrap" style="display:none;">
+          <div class="receive-box">
+            <div class="receive-qr" id="receiveQr"></div>
+            <div class="kpi-sub" style="margin:14px 0 4px;">Your address (from your connected wallet)</div>
+            <div class="row-value" id="receiveAddress">Connect wallet to view</div>
+            <button class="btn btn-ghost" style="margin-top:16px;" id="copyAddressBtn">Copy Address</button>
+          </div>
+        </div>
+
+        <div id="paySuccessWrap" style="display:none;">
+          <div class="success-check">✓</div>
+          <div class="success-title">Payment Sent ✓</div>
+          <div class="verify-card" style="margin: 20px auto 0;">
+            <div class="verify-row"><span class="vr-label">Recipient</span><span class="vr-value" id="successRecipient">0x82...A91F</span></div>
+            <div class="verify-row"><span class="vr-label">Amount</span><span class="vr-value" id="successAmount">🔒 Encrypted</span></div>
+            <div class="verify-row" id="successTxRow" style="display:none;"><span class="vr-label">Tx Hash</span><span class="vr-value" id="successTxHash" style="font-family:var(--font-mono); font-size:0.72rem;">—</span></div>
+            <div class="verify-row"><span class="vr-label">Status</span><span class="pill-badge ok">Confirmed</span></div>
+          </div>
+          <button class="btn btn-ghost" style="width:100%; text-align:center; margin-top:20px;" id="sendAnotherBtn">Send another payment</button>
+        </div>
+
+        <div id="payFailWrap" style="display:none;">
+          <div class="tx-fail">
+            <div class="fail-icon">✕</div>
+            <div class="fail-title">Transaction failed</div>
+            <div class="fail-sub" id="payFailReason">The network rejected the encrypted payload. No funds were moved.</div>
+            <button class="btn btn-primary" style="width:100%; text-align:center;" id="retryPayBtn">Try again</button>
+            <button class="btn btn-ghost" style="width:100%; text-align:center; margin-top:10px;" id="cancelPayBtn">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="recentPaymentsPanel">
+        <div class="panel-title">Recent payments <span class="mono">amounts encrypted</span></div>
+        <div class="row-list" id="recentPaymentsList">
+          <div class="empty-state"><div class="es-icon">⛓️</div><div class="es-title">Connect wallet to load live payments</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ APP: PRIVATE CREDIT ============ -->
+  <div class="view" data-view="app-credit">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Private Credit</h1>
+        <p>A portable credit score built from your repayment history, without exposing it.</p>
+        <p class="kpi-sub" style="margin-top:4px;">Private Credit displays only a result backed by the deployed encrypted credit contract. Wallet balances and transaction counts are not converted into a fabricated credit score.</p>
+      </div>
+
+      <div class="panel">
+        <div class="score-display">
+          <div class="score-label">PRIVATE CREDIT SCORE</div>
+          <div class="score-big" id="creditNum">—</div>
+          <div class="score-rating" id="creditRating" style="visibility:hidden;"></div>
+          <div class="data-source" id="creditSource">UNAVAILABLE</div>
+          <button class="reveal-toggle" id="revealCredit">Reveal score</button>
+        </div>
+        <div class="status-list" style="margin-top:22px;">
+          <div class="status-row"><span class="status-type">Encrypted credit state</span><span class="status-tag" id="creditStateStatus">UNAVAILABLE</span></div>
+          <div class="status-row"><span class="status-type">Fhenix / CoFHE</span><span class="status-tag" id="creditCofheStatus">CHECKING…</span></div>
+          <div class="status-row"><span class="status-type">Wallet authorization</span><span class="status-tag" id="creditAuthStatus">UNAVAILABLE</span></div>
+          <div class="status-row"><span class="status-type">Result source</span><span class="status-tag" id="creditResultSource">UNAVAILABLE</span></div>
+        </div>
+      </div>
+
+      <div class="panel chart-card blurred" id="creditChartCard">
+        <div class="panel-title">
+          Score history
+          <span class="mono" id="chartDelta"><span class="chart-delta">▲ +82 · 6mo</span></span>
+        </div>
+        <div class="chart-lock-overlay" id="chartLockOverlay">
+          <span class="lock-icon">🔒</span>
+          <p id="chartLockText">No encrypted credit history is available until the contract exposes one for this wallet.</p>
+          <button class="reveal-toggle" id="revealChartBtn">Reveal history</button>
+        </div>
+        <div class="chart-svg-wrap">
+          <svg id="creditChartSvg" viewBox="0 0 560 180" width="100%" height="180" preserveAspectRatio="none" style="overflow:visible;">
+            <defs>
+              <linearGradient id="chartLine" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="var(--violet)"/>
+                <stop offset="100%" stop-color="var(--cyan)"/>
+              </linearGradient>
+              <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--cyan)" stop-opacity="0.22"/>
+                <stop offset="100%" stop-color="var(--cyan)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g id="chartGrid"></g>
+            <path id="chartArea" fill="url(#chartFill)" stroke="none"></path>
+            <path id="chartLinePath" fill="none" stroke="url(#chartLine)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <g id="chartPoints"></g>
+          </svg>
+        </div>
+        <div class="chart-axis-row" id="chartAxis"></div>
+        <div class="chart-tooltip" id="chartTooltip"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">PRIVATE PROOF</div>
+        <div class="kpi-sub" style="margin-bottom:14px;">User satisfies:</div>
+        <div class="status-list">
+          <div class="status-row"><span class="status-type">Contract score available</span><span class="status-check" id="creditProofStatus">—</span></div>
+          <div class="status-row"><span class="status-type">Wallet linked</span><span class="status-check">✓</span></div>
+          <div class="status-row"><span class="status-type">Score read from Sepolia</span><span class="status-check" id="creditChainStatus">—</span></div>
+        </div>
+        <div class="kpi-sub" style="margin-top:16px;">Exact values are shown only when the connected wallet is authorized to decrypt the deployed encrypted state.</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Repayment history</div>
+        <div class="row-list" id="repaymentHistoryList">
+          <div class="empty-state"><div class="es-icon">⛓️</div><div class="es-title">Connect to load on-chain history</div><div class="es-sub">No repayment records are fabricated in this build.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ APP: ENCRYPT LAB ============ -->
+  <div class="view" data-view="app-encrypt">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Encrypt &amp; Decrypt Lab</h1>
+        <p>Use the real Fhenix CoFHE browser SDK to encrypt supported values. Decryption is attempted only through the connected wallet's authorized view flow.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-title">CoFHE status <span class="source-badge" id="labCofheBadge">CHECKING…</span></div>
+        <div class="status-list">
+          <div class="status-row"><span class="status-type">Wallet</span><span class="status-tag" id="labWalletStatus">Wallet not connected</span></div>
+          <div class="status-row"><span class="status-type">Network</span><span class="status-tag" id="labNetworkStatus">Data unavailable</span></div>
+          <div class="status-row"><span class="status-type">SDK</span><span class="status-tag" id="labSdkStatus">Checking…</span></div>
+          <div class="status-row"><span class="status-type">Contract dependency</span><span class="status-tag">Not required for standalone ciphertext</span></div>
+        </div>
+      </div>
+      <div class="lab-grid">
+        <div class="panel">
+          <div class="panel-title">Encrypt <span class="source-badge live">Fhenix / CoFHE</span></div>
+          <div class="form-field">
+            <label for="labType">Input type</label>
+            <select id="labType"><option value="uint64">Unsigned integer · uint64</option><option value="uint16">Unsigned integer · uint16</option><option value="text">Text · UTF-16 code units</option></select>
+          </div>
+          <div class="form-field">
+            <label for="labPlaintext">Plaintext</label>
+            <input id="labPlaintext" type="text" inputmode="numeric" autocomplete="off" placeholder="Enter a supported value">
+          </div>
+          <div class="kpi-sub" id="labInputHelp">Numeric values are encrypted as FHE uint64 ciphertext inputs.</div>
+          <button class="btn btn-primary" id="labEncryptBtn" style="width:100%;margin-top:12px;">Encrypt with CoFHE</button>
+          <div class="data-source" id="labEncryptStatus">IDLE</div>
+          <div class="lab-output" id="labCiphertext" style="margin-top:12px;">No ciphertext generated.</div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Decrypt <span class="source-badge">AUTHORIZED VIEW</span></div>
+          <div class="form-field">
+            <label for="labCipherInput">Ciphertext handle (ctHash)</label>
+            <input id="labCipherInput" type="text" autocomplete="off" placeholder="Paste a CoFHE ctHash from this wallet">
+          </div>
+          <div class="form-field">
+            <label for="labDecryptType">Ciphertext type</label>
+            <select id="labDecryptType"><option value="uint64">uint64</option><option value="uint16">uint16</option></select>
+          </div>
+          <button class="btn btn-ghost" id="labDecryptBtn" style="width:100%;margin-top:12px;">Decrypt authorized value</button>
+          <div class="data-source" id="labDecryptStatus">IDLE</div>
+          <div class="lab-output" id="labPlainResult" style="margin-top:12px;">Decrypted result will appear only after successful authorization.</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Privacy flow</div>
+        <div class="lab-flow">
+          <div class="flow-node">Plaintext</div><div class="flow-connector"></div><div class="flow-node emphasis">Encrypted</div><div class="flow-connector"></div><div class="flow-node">FHE computation</div>
+        </div>
+        <div class="lab-flow" style="margin-top:8px;">
+          <div class="flow-node">Authorized decryption</div><div class="flow-connector"></div><div class="flow-node emphasis">Plaintext result</div>
+        </div>
+        <div class="kpi-sub" style="margin-top:16px;">Ciphertext is not Base64 or a hash masquerading as encryption. The app calls the @cofhe/sdk encryption/decryption APIs. Standalone lab ciphertext is held only in this page session unless you explicitly submit it to a contract.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ APP: ACTIVITY ============ -->
+  <div class="view" data-view="app-activity">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Activity</h1>
+        <p>Every encrypted action across CipherRisk, ShieldPay, and Private Credit.</p>
+      </div>
+
+      <div class="tab-toggle" id="activityFilters" style="max-width:420px;">
+        <button class="tab-btn active" data-filter="all">All</button>
+        <button class="tab-btn" data-filter="risk">Risk</button>
+        <button class="tab-btn" data-filter="payments">Payments</button>
+        <button class="tab-btn" data-filter="credit">Credit</button>
+      </div>
+
+      <div class="panel">
+        <div class="feed-list" id="fullActivity"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TECHNOLOGY ============ -->
+  <div class="view" data-view="technology">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Technology</h1>
+        <p>Fully homomorphic encryption lets computation happen on data that's never decrypted along the way.</p>
+      </div>
+    </div>
+    <section class="wrap" style="border-top:none; padding-bottom:0;">
+      <div class="flow-vertical">
+        <div class="flow-node">Your data</div>
+        <div class="flow-connector"></div>
+        <div class="flow-node">Encrypted</div>
+        <div class="flow-connector"></div>
+        <div class="flow-node">Computation</div>
+        <div class="flow-connector"></div>
+        <div class="flow-node emphasis">Only required result</div>
+      </div>
+    </section>
+    <section class="wrap">
+      <div class="step-flow">
+        <div class="step-flow-node">
+          <div class="sf-num">01</div>
+          <div class="sf-title">CONNECT</div>
+          <div class="sf-desc">Connect your wallet</div>
+        </div>
+        <div class="flow-connector"></div>
+        <div class="step-flow-node">
+          <div class="sf-num">02</div>
+          <div class="sf-title">ENCRYPT</div>
+          <div class="sf-desc">Sensitive values are encrypted</div>
+        </div>
+        <div class="flow-connector"></div>
+        <div class="step-flow-node">
+          <div class="sf-num">03</div>
+          <div class="sf-title">COMPUTE</div>
+          <div class="sf-desc">FHE-powered computation works on encrypted data</div>
+        </div>
+        <div class="flow-connector"></div>
+        <div class="step-flow-node sf-final">
+          <div class="sf-num">04</div>
+          <div class="sf-title">VERIFY</div>
+          <div class="sf-desc">Only the required result is revealed</div>
+        </div>
+      </div>
+    </section>
+    <section class="wrap">
+      <div class="section-head">
+        <h2>Architecture</h2>
+        <p>How a request travels from your device to a result, without ever exposing the value in between.</p>
+      </div>
+      <div class="arch-flow">
+        <div class="flow-node">USER</div>
+        <div class="flow-connector"></div>
+        <div class="flow-node">CipherShield UI</div>
+        <div class="flow-connector"></div>
+        <div class="flow-node">Encryption Layer</div>
+        <div class="flow-connector"></div>
+        <div class="flow-node emphasis">Fhenix / CoFHE</div>
+        <div class="flow-connector"></div>
+        <div class="flow-node">Encrypted Computation</div>
+        <div class="flow-connector"></div>
+        <div class="arch-branches">
+          <div class="flow-node small">CipherRisk</div>
+          <div class="flow-node small">ShieldPay</div>
+          <div class="flow-node small">Private Credit</div>
+        </div>
+        <div class="flow-connector"></div>
+        <div class="flow-node emphasis">Selective Result</div>
+      </div>
+    </section>
+    <section class="wrap">
+      <div class="section-head">
+        <h2>Built with Fhenix</h2>
+        <p>CipherShield runs on Fhenix's FHE infrastructure for the Ethereum ecosystem.</p>
+      </div>
+      <div class="built-grid">
+        <div class="built-item"><div class="built-icon">01</div><div><h4>Encrypted computation</h4><p>Arithmetic and logic run directly on ciphertexts, with correctness guaranteed by the underlying encryption scheme.</p></div></div>
+        <div class="built-item"><div class="built-icon">02</div><div><h4>Confidential smart contracts</h4><p>Contract state can hold encrypted values natively, not as an add-on layer around a public ledger.</p></div></div>
+        <div class="built-item"><div class="built-icon">03</div><div><h4>Selective access</h4><p>You decide who can decrypt what — a counterparty, an auditor, or no one at all.</p></div></div>
+        <div class="built-item"><div class="built-icon">04</div><div><h4>Private financial data</h4><p>Balances, positions, and scores stay encrypted at rest, in transit, and while being computed on.</p></div></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ DOCS ============ -->
+  <div class="view" data-view="docs">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Docs</h1>
+        <p>Everything you need to build on or integrate with CipherShield.</p>
+      </div>
+      <section class="wrap" style="padding-top:20px; border-top:none;">
+        <div class="docs-layout">
+          <div class="docs-sidebar" id="docsSidebar">
+            <button class="doc-link active" data-doc="introduction">Introduction</button>
+            <button class="doc-link" data-doc="getting-started">Getting Started</button>
+            <button class="doc-link" data-doc="architecture">Architecture</button>
+            <button class="doc-link" data-doc="cipherrisk">CipherRisk</button>
+            <button class="doc-link" data-doc="shieldpay">ShieldPay</button>
+            <button class="doc-link" data-doc="private-credit">Private Credit</button>
+            <button class="doc-link" data-doc="encryption">Encryption</button>
+            <button class="doc-link" data-doc="smart-contracts">Smart Contracts</button>
+            <button class="doc-link" data-doc="testnet">Testnet</button>
+            <button class="doc-link" data-doc="security">Security</button>
+            <button class="doc-link" data-doc="faq">FAQ</button>
+          </div>
+          <div class="docs-content" id="docsContent"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ============ ABOUT ============ -->
+  <div class="view" data-view="about">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>About CipherShield</h1>
+        <p>We think financial privacy shouldn't be the price of using a public blockchain.</p>
+      </div>
+      <section class="wrap" style="padding-top:10px; border-top:none;">
+        <p style="color:var(--muted); max-width:60ch; line-height:1.7;">CipherShield is built on Fhenix's fully homomorphic encryption infrastructure so that balances, trades, and credit history can stay encrypted even while smart contracts compute on them. Nothing about using a public chain requires broadcasting your financial life to it.</p>
+        <div class="values-grid">
+          <div class="value-item"><h4>Privacy by default</h4><p>Every product starts encrypted. Visibility is something you opt into, not out of.</p></div>
+          <div class="value-item"><h4>No compromise on composability</h4><p>Encrypted values still work inside DeFi — lending, payments, and credit all interoperate.</p></div>
+          <div class="value-item"><h4>You hold the keys</h4><p>Only you decide who can ever decrypt your data, including CipherShield itself.</p></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</main>
+
+<footer class="wrap">
+  <span>CipherShield — testnet prototype, not audited, not for real funds</span>
+  <span>Encrypted by design, powered by Fhenix</span>
+</footer>
+
+<div class="bottom-nav">
+  <button class="bn-item" data-nav="app-dashboard"><span class="bn-icon"></span>Home</button>
+  <button class="bn-item" data-nav="app-risk"><span class="bn-icon"></span>Risk</button>
+  <button class="bn-fab" id="fabAdd">+</button>
+  <button class="bn-item" data-nav="app-pay"><span class="bn-icon"></span>Pay</button>
+  <button class="bn-item" data-nav="app-credit"><span class="bn-icon"></span>Credit</button>
+  <button class="bn-item" data-nav="app-encrypt"><span class="bn-icon"></span>Encrypt</button>
+</div>
+
+<!-- Wallet connect modal -->
+<div class="modal-backdrop" id="walletConnectModal">
+  <div class="modal-sheet">
+    <div class="modal-head"><h3 id="walletModalTitle">Connect a wallet</h3><button class="modal-close" id="closeWalletModal">✕</button></div>
+    <div id="walletModalBody"></div>
+  </div>
+</div>
+
+<!-- Add funds modal -->
+<div class="modal-backdrop" id="addFundsModal">
+  <div class="modal-sheet">
+    <div class="modal-head"><h3>Add funds</h3><button class="modal-close" id="closeModal">✕</button></div>
+    <div class="step-track">Step <strong id="stepNum">1</strong> of 3</div>
+
+    <div id="stepContent"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.15.0/dist/ethers.umd.min.js"></script>
+
+<!--
+  CipherCoFHE wiring
+  ------------------------------------------------------------------
+  Defines window.CipherCoFHE, which the rest of this app already calls:
+  .connect(), .encryptUint64(), .encryptUint16(), .decryptUint64(), .decryptUint16().
+  Built on Fhenix's @cofhe/sdk (the current SDK — the older "cofhejs"
+  package was retired in 2026).
+
+  @cofhe/sdk 0.6.1 exposes encryptInputs(...).execute() and
+  decryptForView(...).execute() for browser-side CoFHE flows.
+-->
+<script type="module">
+  import { createClient, FheTypes, Encryptable } from "https://cdn.jsdelivr.net/npm/@cofhe/sdk@0.6.1/+esm";
+  import { ethers as ethersEsm } from "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm";
+
+  let cofheClient = null;
+  let cofheAccount = null;
+  let cofheChainId = null;
+
+  async function ensureCofheClient() {
+    if (cofheClient) return cofheClient;
+    const activeProvider = window.CipherShieldGetProvider ? window.CipherShieldGetProvider() : window.ethereum;
+    if (!activeProvider) throw new Error('No wallet found.');
+    const browserProvider = new ethersEsm.BrowserProvider(activeProvider);
+    const network = await browserProvider.getNetwork();
+    const chainId = Number(network.chainId);
+    if(chainId !== 11155111) throw new Error('CoFHE is configured for Ethereum Sepolia (chain 11155111) in this single-file build.');
+    const signer = await browserProvider.getSigner();
+    const account = await signer.getAddress();
+    if(cofheClient && cofheAccount === account && cofheChainId === chainId) return cofheClient;
+    cofheClient = await createClient({ provider: browserProvider, signer, chainId });
+    cofheAccount = account;
+    cofheChainId = chainId;
+    return cofheClient;
+  }
+
+  async function cofheEncrypt(kind, value) {
+    const c = await ensureCofheClient();
+    const encryptable = kind === 16 ? Encryptable.uint16(BigInt(value)) : Encryptable.uint64(BigInt(value));
+    const built = c.encryptInputs([encryptable]);
+    const [input] = built.execute ? await built.execute() : await built;
+    return {
+      ctHash: input.ctHash ?? input.hash,
+      securityZone: input.securityZone ?? 0,
+      utype: input.utype,
+      signature: input.signature
+    };
+  }
+
+  async function cofheDecrypt(kind, ctHash) {
+    const c = await ensureCofheClient();
+    const type = kind === 16 ? FheTypes.Uint16 : FheTypes.Uint64;
+    const result = await c.decryptForView(ctHash, type).execute();
+    return (result && typeof result === 'object' && 'value' in result) ? result.value : result;
+  }
+
+  window.CipherCoFHE = {
+    async connect(){ await ensureCofheClient(); return true; },
+    encryptUint64: (value) => cofheEncrypt(64, value),
+    encryptUint16: (value) => cofheEncrypt(16, value),
+    decryptUint64: (ctHash) => cofheDecrypt(64, ctHash),
+    decryptUint16: (ctHash) => cofheDecrypt(16, ctHash),
+    reset(){ cofheClient=null; cofheAccount=null; cofheChainId=null; }
+  };
+</script>
+<script>
+  /**
+   * ============================================================================
+   * CipherShield — single-file testnet prototype
+   * ============================================================================
+   * WALLET CONNECTION IS REAL: this build talks to whatever EIP-1193 wallet
+   * is injected as window.ethereum (MetaMask, Coinbase Wallet, Brave Wallet,
+   * etc.) — real eth_requestAccounts, real eth_chainId, real accountsChanged/
+   * chainChanged listeners, real eth_getBalance, real network switching. The
+   * address you see connected is always an address the wallet itself returned.
+   *
+   * User-specific wallet balances are read directly from the connected EIP-1193
+   * provider. CipherRisk and Private Credit only display values backed by their
+   * configured encrypted contracts. No wallet-derived heuristic is used as a
+   * credit or risk score.
+   *
+   * CONFIG below is the single place that holds the target network. Fhenix's
+   * CoFHE coprocessor currently runs on top of existing EVM testnets (Ethereum
+   * Sepolia, Arbitrum Sepolia, Base Sepolia) rather than its own chain, so
+   * Sepolia is used as the default target network here — change it if you
+   * deploy to one of the other CoFHE-supported testnets instead.
+   *
+   * The CoFHE browser bridge below uses the official SDK API for encryptInputs,
+   * decryptForView and permits. Deploy the FHE contracts and set fheRisk/fheCredit.
+   * ============================================================================
+   */
+  window.CONFIG = {
+  chainId: '0xaa36a7',
+  chainName: 'Sepolia',
+  rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+  explorer: 'https://sepolia.etherscan.io',
+  blockExplorer: 'https://sepolia.etherscan.io',
+  backendUrl: window.CIPHERSHIELD_BACKEND_URL || '',
+  contracts: { fheRisk: '', fheCredit: '', payment: '' },
+  usdc: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
+  usdcDecimals: 6,
+  isDemoMode: false
+};
+const CONFIG = window.CONFIG;
+window.addEventListener('load',()=>{ setTimeout(()=>{ updateContractStatus(); if(walletConnected) autoConfigureContracts(); },300); });
+
+// Apply the single-file deployment config immediately, before any async backend config.
+(function applySingleFileConfigEarly(){
+  const s = window.CIPHERSHIELD_SINGLE_FILE || {};
+  if (s.backendUrl) CONFIG.backendUrl = s.backendUrl;
+  if (s.contracts) {
+    Object.keys(s.contracts).forEach(k => {
+      if (s.contracts[k]) CONFIG.contracts[k] = s.contracts[k];
+    });
+  }
+})();
+
+  const ERC20_TRANSFER_SELECTOR = 'a9059cbb';
+  const KNOWN_CHAINS = {
+    '0x1': 'Ethereum Mainnet',
+    '0xaa36a7': 'Sepolia',
+    '0x66eee': 'Arbitrum Sepolia',
+    '0x14a34': 'Base Sepolia',
+    '0x89': 'Polygon',
+    '0x38': 'BNB Chain',
+  };
+  function chainName(hex){ return (hex && KNOWN_CHAINS[hex.toLowerCase()]) || ('Chain ' + (hex || '?')); }
+  function shortAddr(addr){ return addr ? addr.slice(0,6) + '…' + addr.slice(-4) : ''; }
+
+  // ---------- global wallet state ----------
+  let walletConnected = false;
+  let activeWalletProvider = null; // the specific EIP-6963 wallet the user picked & confirmed
+  let walletWrongNetwork = false;
+  let currentAccount = null;
+  let currentChainIdHex = null;
+
+  // ---------- lattice animation ----------
+  const lattice = document.getElementById('lattice');
+  const chars = '01アεΣλ∆';
+  for (let i = 0; i < 49; i++){
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.textContent = chars[Math.floor(Math.random() * chars.length)];
+    cell.style.animationDelay = (Math.random() * 3.6).toFixed(2) + 's';
+    lattice.appendChild(cell);
+  }
+
+  // ---------- live activity feed ----------
+  let feedActivity = [];
+
+  function logActivity(entry){
+    feedActivity.unshift({
+      icon: entry.icon || '◆',
+      title: entry.title,
+      sub: entry.sub || '',
+      cat: entry.cat || 'all',
+      date: new Date().toLocaleString(undefined, {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})
+    });
+    if(feedActivity.length > 50) feedActivity.length = 50;
+    refreshActivity();
+    refreshDashboardActivity();
+  }
+
+  function renderFeed(container, list){
+    container.innerHTML = '';
+    if(!list.length){
+      container.innerHTML = `<div class="empty-state"><div class="es-icon">🗂️</div><div class="es-title">No activity yet</div><div class="es-sub">Encrypted actions across CipherShield will show up here.</div></div>`;
+      return;
+    }
+    list.forEach(item=>{
+      const row = document.createElement('div');
+      row.className = 'feed-item';
+      row.innerHTML = `<div class="feed-icon">${item.icon}</div><div class="feed-body"><div class="feed-title">${item.title}</div><div class="feed-sub">${item.sub}</div></div><div class="feed-date">${item.date}</div>`;
+      container.appendChild(row);
+    });
+  }
+  const fullActivityEl = document.getElementById('fullActivity');
+  let activeActivityFilter = 'all';
+  function refreshActivity(){
+    if(!walletConnected){
+      fullActivityEl.innerHTML = `<div class="empty-state"><div class="es-icon">🔌</div><div class="es-title">Wallet not connected</div><div class="es-sub">Connect your wallet to see your encrypted activity.</div></div>`;
+      return;
+    }
+    renderFeed(fullActivityEl, activeActivityFilter === 'all' ? feedActivity : feedActivity.filter(a=> a.cat === activeActivityFilter));
+  }
+
+  // ---------- dashboard "Recent activity" panel (dates now shown here too) ----------
+  const dashboardActivityEl = document.getElementById('dashboardRecentActivity');
+  function refreshDashboardActivity(){
+    if(!dashboardActivityEl) return;
+    if(!walletConnected){
+      dashboardActivityEl.innerHTML = `<div class="empty-state"><div class="es-icon">🔌</div><div class="es-title">Wallet not connected</div><div class="es-sub">Connect your wallet to see your recent activity.</div></div>`;
+      return;
+    }
+    dashboardActivityEl.innerHTML = '';
+    feedActivity.slice(0, 3).forEach(item=>{
+      const row = document.createElement('div');
+      row.className = 'status-row';
+      row.innerHTML = `<span class="status-type">${item.title}</span><span class="status-date">${item.date}</span><span class="status-check">✓</span>`;
+      dashboardActivityEl.appendChild(row);
+    });
+  }
+
+  refreshActivity();
+  refreshDashboardActivity();
+
+  document.querySelectorAll('#activityFilters [data-filter]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#activityFilters [data-filter]').forEach(b=> b.classList.toggle('active', b===btn));
+      activeActivityFilter = btn.getAttribute('data-filter');
+      refreshActivity();
+    });
+  });
+
+  // ---------- reveal toggle (event delegation) ----------
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-reveal]');
+    if(!btn) return;
+    const key = btn.getAttribute('data-reveal');
+    const span = document.querySelector(`[data-mask="${key}"]`);
+    if(!span) return;
+    const revealed = span.dataset.revealed === '1';
+    if(revealed){
+      span.textContent = '••••';
+      span.dataset.revealed = '0';
+      btn.textContent = 'Reveal';
+    } else {
+      span.textContent = span.dataset.real;
+      span.dataset.revealed = '1';
+      btn.textContent = 'Hide';
+      setTimeout(()=>{
+        if(span.dataset.revealed === '1'){
+          span.textContent = '••••';
+          span.dataset.revealed = '0';
+          btn.textContent = 'Reveal';
+        }
+      }, 6000);
+    }
+  });
+
+  // ---------- reveal toggle for balance/debt bars ----------
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-reveal-bars]');
+    if(!btn) return;
+    const key = btn.getAttribute('data-reveal-bars');
+    const bars = document.querySelector(`[data-bars="${key}"]`);
+    const real = document.querySelector(`[data-bars-real="${key}"]`);
+    if(!bars || !real) return;
+    const revealed = real.dataset.revealed === '1';
+    function hide(){
+      bars.style.display = 'flex';
+      real.style.display = 'none';
+      real.dataset.revealed = '0';
+      btn.textContent = 'Reveal';
+    }
+    if(revealed){
+      hide();
+    } else {
+      bars.style.display = 'none';
+      real.textContent = real.dataset.real;
+      real.style.display = 'inline';
+      real.dataset.revealed = '1';
+      btn.textContent = 'Hide';
+      setTimeout(()=>{ if(real.dataset.revealed === '1') hide(); }, 6000);
+    }
+  });
+
+  // ---------- Private Credit UI (contract-backed only) ----------
+  document.getElementById('revealCredit').addEventListener('click', async function(){
+    const num=document.getElementById('creditNum'), rating=document.getElementById('creditRating');
+    if(num.dataset.revealed==='1'){ num.textContent='•••'; rating.style.visibility='hidden'; num.dataset.revealed='0'; this.textContent='Reveal score'; return; }
+    if(!walletConnected){ openWalletModal(); return; }
+    const btn=this; btn.disabled=true; btn.textContent='Decrypting…';
+    try{
+      const c=await loadLiveCredit();
+      if(!c) throw new Error('Private Credit unavailable — no initialized encrypted credit profile is available for this wallet.');
+      num.textContent=String(c.score);
+      rating.textContent='AUTHORIZED RESULT'; rating.style.visibility='visible';
+      num.dataset.revealed='1';
+      document.getElementById('creditSource').textContent='Fhenix / CoFHE · encrypted contract state';
+      document.getElementById('creditAuthStatus').textContent='AUTHORIZED';
+      logActivity({icon:'🔓', title:'Private Credit result viewed', sub:'Authorized Fhenix / CoFHE decryption', cat:'credit'});
+    }catch(e){ alert(e.message||'Authorized decryption failed.'); }
+    finally{ btn.disabled=false; btn.textContent=num.dataset.revealed==='1'?'Hide score':'Reveal score'; }
+  });
+
+  // ---------- routing ----------
+
+  const views = document.querySelectorAll('.view');
+  const appViewNames = ['app-dashboard','app-risk','app-pay','app-credit','app-encrypt','app-activity'];
+
+  function setActive(name){
+    views.forEach(v=> v.classList.toggle('active', v.dataset.view === name));
+    document.querySelectorAll('[data-nav]').forEach(el=>{
+      const isActive = el.getAttribute('data-nav') === name || (el.getAttribute('data-group')==='app' && appViewNames.includes(name));
+      el.classList.toggle('active', isActive);
+    });
+    document.body.classList.toggle('in-app', appViewNames.includes(name));
+    document.getElementById('appSubnav').classList.toggle('show', appViewNames.includes(name));
+    document.getElementById('mobileMenu').classList.remove('open');
+    window.scrollTo({top:0, behavior:'instant'});
+    history.replaceState(null, '', '#' + name);
+    if(name === 'app-dashboard') loadDashboard();
+    if(name === 'app-risk') refreshRiskPanel();
+    if(name === 'app-activity') refreshActivity();
+    if(name === 'app-pay') refreshPayPanel();
+  }
+
+  // ---------- dashboard skeleton loading ----------
+  function loadDashboard(){
+    const skel = document.getElementById('dashboardSkeleton');
+    const content = document.getElementById('dashboardContent');
+    const notConnected = document.getElementById('dashboardNotConnected');
+    if(!walletConnected){
+      skel.classList.remove('show');
+      content.classList.add('hide');
+      notConnected.style.display = 'block';
+      refreshDashboardActivity();
+      return;
+    }
+    notConnected.style.display = 'none';
+    skel.classList.add('show');
+    content.classList.add('hide');
+    refreshDashboardActivity();
+    refreshLiveData().finally(()=>{
+      skel.classList.remove('show');
+      content.classList.remove('hide');
+    });
+  }
+  const dashboardConnectBtn = document.getElementById('dashboardConnectBtn');
+  if(dashboardConnectBtn){
+    dashboardConnectBtn.addEventListener('click', ()=> openWalletModal());
+  }
+
+  document.addEventListener('click', (e)=>{
+    const el = e.target.closest('[data-nav]');
+    if(!el) return;
+    setActive(el.getAttribute('data-nav'));
+  });
+
+  window.addEventListener('load', ()=>{
+    const initial = (location.hash || '#home').slice(1);
+    setActive(views[0] ? (document.querySelector(`[data-view="${initial}"]`) ? initial : 'home') : 'home');
+  });
+
+  // ---------- hamburger ----------
+  document.getElementById('hamburgerBtn').addEventListener('click', ()=>{
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+
+  // ---------- wallet connect ----------
+  // ---------- CipherRisk: live contract read ----------
+  let riskAnalyzed = false;
+  const RISK_ABI = [
+    {name:'getPosition',type:'function',stateMutability:'view',inputs:[{name:'account',type:'address'}],outputs:[{name:'collateral',type:'uint256'},{name:'debt',type:'uint256'},{name:'initialized',type:'bool'}]},
+    {name:'setPosition',type:'function',stateMutability:'nonpayable',inputs:[{name:'encryptedCollateral',type:'tuple',components:[{name:'ctHash',type:'uint256'},{name:'securityZone',type:'uint8'},{name:'utype',type:'uint8'},{name:'signature',type:'bytes'}]},{name:'encryptedDebt',type:'tuple',components:[{name:'ctHash',type:'uint256'},{name:'securityZone',type:'uint8'},{name:'utype',type:'uint8'},{name:'signature',type:'bytes'}]}],outputs:[] }
+  ];
+  const CREDIT_ABI = [
+    {name:'getProfile',type:'function',stateMutability:'view',inputs:[{name:'account',type:'address'}],outputs:[{name:'score',type:'uint256'},{name:'repayments',type:'uint256'},{name:'initialized',type:'bool'}]},
+    {name:'setProfile',type:'function',stateMutability:'nonpayable',inputs:[{name:'encryptedScore',type:'tuple',components:[{name:'ctHash',type:'uint256'},{name:'securityZone',type:'uint8'},{name:'utype',type:'uint8'},{name:'signature',type:'bytes'}]},{name:'encryptedRepayments',type:'tuple',components:[{name:'ctHash',type:'uint256'},{name:'securityZone',type:'uint8'},{name:'utype',type:'uint8'},{name:'signature',type:'bytes'}]}],outputs:[] }
+  ];
+  function encodeCall(selector, args=''){ return '0x'+selector+args; }
+  // ---------- automatic contract discovery ----------
+  // Never guesses a role from address order. It probes the candidate addresses
+  // with the exact read methods expected by this frontend.
+  async function autoConfigureContracts(){
+    // Contract roles are never guessed from arbitrary addresses.
+    // Configure CONFIG.contracts.fheRisk / fheCredit explicitly after deployment.
+    updateContractStatus();
+  }
+  function updateContractStatus(){
+    const riskOk=!!CONFIG.contracts.fheRisk, creditOk=!!CONFIG.contracts.fheCredit;
+    let el=document.getElementById('contractStatus');
+    if(!el){ el=document.createElement('div'); el.id='contractStatus'; el.style.cssText='position:fixed;right:14px;bottom:14px;z-index:9999;padding:8px 12px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(12,14,20,.92);backdrop-filter:blur(8px);font-size:12px;pointer-events:none'; document.body.appendChild(el); }
+    if(el){
+      el.textContent = `CipherRisk ${riskOk?'LIVE':'NOT CONFIGURED'} · Private Credit ${creditOk?'LIVE':'NOT CONFIGURED'} · Network ${CONFIG.chainName}`;
+      el.className = 'status-text ' + (riskOk&&creditOk?'ok':'warn');
+    }
+  }
+
+  function encodeAddressArg2(address){ return address.slice(2).toLowerCase().padStart(64,'0'); }
+  async function contractRead(address, abi, method, args=[]){
+    const provider=getProvider();
+    if(!provider || !address) throw new Error('Contract address is not configured. Deploy the contracts and set CONFIG.contracts.');
+    const iface=new ethers.Interface(abi);
+    const data=iface.encodeFunctionData(method,args);
+    const out=await provider.request({method:'eth_call',params:[{to:address,data},'latest']});
+    return iface.decodeFunctionResult(method,out);
+  }
+  async function loadLiveRisk(){
+    if(!walletConnected || walletWrongNetwork || !CONFIG.contracts.fheRisk || !window.CipherCoFHE) return null;
+    const r=await contractRead(CONFIG.contracts.fheRisk,RISK_ABI,'getPosition',[currentAccount]);
+    if(!r[2]) return null;
+    const collateral=await window.CipherCoFHE.decryptUint64(r[0]);
+    const debt=await window.CipherCoFHE.decryptUint64(r[1]);
+    const c=Number(collateral), d=Number(debt);
+    if(!Number.isFinite(c)||!Number.isFinite(d)) throw new Error('CipherRisk returned an invalid encrypted result.');
+    const ltv=c>0 ? (d/c)*100 : 0;
+    const health=d>0 ? c/d : Infinity;
+    const liquidation=Math.min(100, Math.max(0, ltv));
+    return {health, ltv, liquidation, debt:d, collateral:c, source:'contract'};
+  }
+  async function loadWalletRisk(){
+    return null;
+  }
+  function setRiskUI(r){
+    const hf=document.getElementById('riskHealthFactor'), ltv=document.getElementById('riskLtv'), liq=document.getElementById('riskLiquidation');
+    const dashBadge=document.getElementById('dashRiskBadge'), dashSub=document.getElementById('dashRiskSub'), slider=document.getElementById('riskSliderValue'), crypto=document.getElementById('cryptoRiskValue');
+    if(!r){ [hf,ltv,liq,slider,crypto].forEach(e=>{if(e)e.textContent='Data unavailable'}); if(dashBadge){dashBadge.textContent='UNAVAILABLE';dashBadge.className='pill-badge warn';} if(dashSub)dashSub.textContent=walletWrongNetwork?'Wrong network':'No deployed encrypted CipherRisk position for this wallet'; const st=document.getElementById('riskPositionsSourceTag'); if(st)st.textContent='UNAVAILABLE'; return; }
+    hf.textContent = Number.isFinite(r.health) ? r.health.toFixed(2) : '∞';
+    ltv.textContent=r.ltv.toFixed(2)+'%'; liq.textContent=r.liquidation.toFixed(2)+'%'; slider.textContent=r.liquidation.toFixed(2)+'%'; crypto.textContent=r.liquidation.toFixed(2)+'%'; const marker=document.getElementById('riskSliderMarker'); if(marker) marker.style.left=Math.min(100,r.liquidation)+'%';
+    const label=r.liquidation>=50?'HIGH':r.liquidation>=20?'MEDIUM':'LOW'; if(dashBadge){dashBadge.textContent=label;dashBadge.className='pill-badge '+(label==='LOW'?'ok':'warn');}
+    if(dashSub)dashSub.textContent='Fhenix / CoFHE encrypted position';
+    const sourceTag=document.getElementById('riskPositionsSourceTag'); if(sourceTag) sourceTag.textContent='Fhenix / CoFHE encrypted state';
+    const posEth=document.getElementById('riskPosEth'), posUsdc=document.getElementById('riskPosUsdc'), posDebt=document.getElementById('riskPosDebt');
+    if(posEth) posEth.textContent='🔒 Encrypted collateral';
+    if(posUsdc) posUsdc.textContent='🔒 Encrypted position';
+    if(posDebt) posDebt.textContent='🔒 Encrypted debt';
+  }
+  async function loadLiveCredit(){
+    if(!walletConnected || walletWrongNetwork || !CONFIG.contracts.fheCredit || !window.CipherCoFHE) return null;
+    const out=await contractRead(CONFIG.contracts.fheCredit,CREDIT_ABI,'getProfile',[currentAccount]);
+    if(!out[2]) return null;
+    const score=Number(await window.CipherCoFHE.decryptUint16(out[0]));
+    if(!Number.isFinite(score)) throw new Error('Private Credit returned an invalid encrypted result.');
+    return { score, source:'contract' };
+  }
+  async function loadWalletCredit(){
+    return null;
+  }
+  autoConfigureContracts().catch(()=>{});
+  async function refreshLiveData(){
+    if(!walletConnected){ setRiskUI(null); return; }
+    const provider=getProvider();
+    if(!provider) return;
+    try{
+      const raw=await provider.request({method:'eth_getBalance',params:[currentAccount,'latest']});
+      const eth=Number(BigInt(raw))/1e18;
+      const balanceText=Number.isFinite(eth)?eth.toFixed(6)+' ETH':'Data unavailable';
+      const bal=document.getElementById('dashBalanceValue'); if(bal) bal.textContent=balanceText;
+      const db=document.getElementById('dashNativeBalance'); if(db) db.textContent=balanceText;
+      const dd=document.getElementById('cryptoBalanceReal'); if(dd){dd.dataset.real=balanceText;}
+      const usdcRaw=await provider.request({method:'eth_call',params:[{to:CONFIG.usdc,data:'0x70a08231'+currentAccount.slice(2).padStart(64,'0')},'latest']});
+      const usdc=Number(BigInt(usdcRaw||'0x0'))/(10**CONFIG.usdcDecimals);
+      const usdcText=Number.isFinite(usdc)?usdc.toFixed(6)+' USDC':'Data unavailable';
+      const du=document.getElementById('dashUsdcBalance'); if(du) du.textContent=usdcText;
+      const count=await provider.request({method:'eth_getTransactionCount',params:[currentAccount,'latest']});
+      const txText=String(Number(BigInt(count)));
+      const sub=document.getElementById('dashBalanceSub'); if(sub) sub.textContent='Native: '+balanceText+' · USDC: '+usdcText+' · Tx nonce: '+txText;
+      const addr=document.getElementById('dashWalletAddress'); if(addr) addr.textContent=shortAddr(currentAccount);
+      const net=document.getElementById('dashNetwork'); if(net) net.textContent=chainName(currentChainIdHex);
+      const labAddr=document.getElementById('labWalletStatus'); if(labAddr) labAddr.textContent=shortAddr(currentAccount);
+      const labNet=document.getElementById('labNetworkStatus'); if(labNet) labNet.textContent=chainName(currentChainIdHex);
+    }catch(e){ console.warn('Wallet data read failed',e); }
+    try{
+      const r=await loadLiveRisk(); setRiskUI(r);
+      const rs=document.getElementById('riskEmptySub'); if(!r && rs) rs.textContent=CONFIG.contracts.fheRisk?'No initialized encrypted position is available for this wallet.':'CipherRisk contract not configured.';
+    }catch(e){ console.warn('CipherRisk read:',e); setRiskUI(null); }
+    try{
+      const c=await loadLiveCredit();
+      const el=document.getElementById('dashCreditValue'); if(el) el.textContent=c?String(c.score):'Data unavailable';
+      const ps=document.getElementById('creditProofStatus'); if(ps) ps.textContent=c?'✓':'UNAVAILABLE';
+      const cs=document.getElementById('creditChainStatus'); if(cs) cs.textContent=c?'✓':'UNAVAILABLE';
+      const state=document.getElementById('creditStateStatus'); if(state) state.textContent=c?'AVAILABLE':'UNAVAILABLE';
+      const source=document.getElementById('creditResultSource'); if(source) source.textContent=c?'Fhenix / CoFHE':'UNAVAILABLE';
+    }catch(e){ const el=document.getElementById('dashCreditValue'); if(el) el.textContent='Data unavailable'; }
+    const cofhe=window.CipherCoFHE?'AVAILABLE':'SDK unavailable';
+    const ds=document.getElementById('dashCofheStatus'); if(ds) ds.textContent=cofhe;
+    const cs=document.getElementById('creditCofheStatus'); if(cs) cs.textContent=cofhe;
+  }
+  function refreshRiskPanel(){
+    const emptyState=document.getElementById('riskEmptyState'), results=document.getElementById('riskResults');
+    if(!emptyState||!results)return;
+    if(riskAnalyzed&&walletConnected){emptyState.style.display='none';results.style.display='block';}else{results.style.display='none';emptyState.style.display='block';}
+  }
+  refreshRiskPanel();
+  const analyzeBtn=document.getElementById('analyzeBtn');
+  if(analyzeBtn) analyzeBtn.addEventListener('click', async()=>{
+    if(!walletConnected){openWalletModal();return;}
+    analyzeBtn.disabled=true; analyzeBtn.textContent='Analyzing…';
+    try{
+      if(walletWrongNetwork) throw new Error('Wrong network. Switch to the configured CipherShield network first.');
+      if(!CONFIG.contracts.fheRisk) throw new Error('CipherRisk unavailable — contract not configured.');
+      const r=await loadLiveRisk();
+      if(!r) throw new Error('Insufficient on-chain data — no initialized encrypted CipherRisk position exists for this wallet.');
+      setRiskUI(r); riskAnalyzed=true; refreshRiskPanel();
+      logActivity({icon:'🛡️',title:'CipherRisk position analyzed',sub:'Fhenix / CoFHE encrypted state · authorized result',cat:'risk'});
+    }catch(e){ document.getElementById('riskEmptyTitle').textContent='CipherRisk unavailable'; document.getElementById('riskEmptySub').textContent=e.message||'Encrypted risk data unavailable.'; refreshRiskPanel(); alert(e.message||'CipherRisk unavailable.'); }
+    finally{analyzeBtn.disabled=false; analyzeBtn.textContent='Analyze Position';}
+  });
+
+  // ---------- Docs sidebar ----------
+  const docsCopy = {
+    'introduction': ['Introduction', 'CipherShield lets you use DeFi, payments, and credit without broadcasting your financial data. Every product runs on fully homomorphic encryption, so the values themselves are never exposed on chain.'],
+    'getting-started': ['Getting Started', 'Connect a wallet, encrypt your first value, and read the result back through CipherShield — no separate account or key management required.'],
+    'architecture': ['Architecture', 'Requests flow from the UI through an encryption layer, into Fhenix / CoFHE stores encrypted position and credit data on-chain; only the connected user can decrypt their authorized ciphertext for the UI.'],
+    'cipherrisk': ['CipherRisk', 'Computes health factor, LTV, and liquidation risk only from an initialized encrypted CipherRisk position returned by the configured contract.'],
+    'shieldpay': ['ShieldPay', 'Sends real Sepolia ETH/USDC transfers and indexes application-level payment events. Standard blockchain transfer details remain public.'],
+    'private-credit': ['Private Credit', 'Displays a credit result only when a deployed encrypted Private Credit profile exists for the connected wallet; wallet balances and transaction counts are not converted into a fabricated score.'],
+    'encryption': ['Encryption', 'Values are encrypted client-side before they ever leave your device, using Fhenix\'s fully homomorphic encryption scheme.'],
+    'smart-contracts': ['Smart Contracts', 'Contracts can hold and operate on encrypted state natively, so privacy isn\'t an add-on layer bolted onto a public ledger.'],
+    'testnet': ['Testnet', 'CipherShield is available on testnet for builders to try encrypted flows before mainnet deployment.'],
+    'security': ['Security', 'CipherShield is a testnet prototype and has not been audited. It is designed around Fhenix\'s FHE primitives and selective disclosure so that, once real encryption is wired in, only explicitly authorized parties would ever be able to decrypt a value.'],
+    'faq': ['FAQ', 'Common questions about wallets, supported assets, and how selective disclosure works in practice.'],
+  };
+  const docsContent = document.getElementById('docsContent');
+  function renderDoc(key){
+    const [title, body] = docsCopy[key];
+    docsContent.innerHTML = `<h3>${title}</h3><p>${body}</p>`;
+  }
+  document.querySelectorAll('.doc-link').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.doc-link').forEach(b=> b.classList.toggle('active', b===btn));
+      renderDoc(btn.getAttribute('data-doc'));
+    });
+  });
+  if(docsContent) renderDoc('introduction');
+
+  const walletBtn = document.getElementById('walletBtn');
+  const walletLabel = document.getElementById('walletLabel');
+  const walletInlineLabel = document.getElementById('walletInlineLabel');
+  const walletDot = walletBtn.querySelector('.dot');
+  const walletDropdown = document.getElementById('walletDropdown');
+  const walletDropdownAddr = document.getElementById('walletDropdownAddr');
+  const walletDropdownBalance = document.getElementById('walletDropdownBalance');
+  const networkBadge = document.getElementById('networkBadge');
+  const networkBadgeText = document.getElementById('networkBadgeText');
+  const wrongNetworkBanner = document.getElementById('wrongNetworkBanner');
+
+  function getProvider(){ return activeWalletProvider || ((typeof window !== 'undefined') ? window.ethereum : null); }
+  window.CipherShieldGetProvider = getProvider; // exposed so other script blocks (FHE calls, payment indexer) always target the wallet the user actually picked, not just window.ethereum
+
+  function updateNetworkUI(){
+    networkBadge.style.display = walletConnected ? 'inline-flex' : 'none';
+    networkBadge.classList.toggle('wrong', walletWrongNetwork);
+    networkBadgeText.textContent = walletWrongNetwork ? chainName(currentChainIdHex) : CONFIG.chainName;
+    const dashActive = document.querySelector('[data-view="app-dashboard"]').classList.contains('active');
+    wrongNetworkBanner.classList.toggle('show', walletConnected && walletWrongNetwork && dashActive);
+  }
+
+  async function refreshBalance(){
+    const provider = getProvider();
+    if(!provider || !currentAccount || !walletDropdownBalance) return;
+    try{
+      const balHex = await provider.request({ method: 'eth_getBalance', params: [currentAccount, 'latest'] });
+      const wei = BigInt(balHex);
+      const whole = wei / (10n ** 18n);
+      const frac = (wei % (10n ** 18n)).toString().padStart(18,'0').slice(0,4);
+      let label = whole.toString() + '.' + frac + ' ETH';
+
+      // Read Sepolia USDC balance using the standard ERC-20 balanceOf call.
+      const data = '0x70a08231' + currentAccount.slice(2).padStart(64,'0');
+      const usdcHex = await provider.request({
+        method:'eth_call',
+        params:[{to:CONFIG.usdc,data}, 'latest']
+      });
+      const usdcRaw = BigInt(usdcHex || '0x0');
+      const usdcWhole = usdcRaw / (10n ** 6n);
+      const usdcFrac = usdcRaw % (10n ** 6n);
+      const usdcLabel = usdcWhole.toString() + '.' + usdcFrac.toString().padStart(6,'0').slice(0,2) + ' USDC';
+      label += ' · ' + usdcLabel;
+      walletDropdownBalance.textContent = label + ' · ' + chainName(currentChainIdHex);
+      const ethLabel = whole.toString() + '.' + frac + ' ETH';
+      const dashBalance=document.getElementById('dashBalanceValue'); if(dashBalance) dashBalance.textContent=ethLabel+' · '+usdcLabel;
+      const dashSub=document.getElementById('dashBalanceSub'); if(dashSub) dashSub.textContent='Live Sepolia wallet balances';
+      // cache raw balances for pre-send checks in attemptSend()
+      window.CipherShieldBalances = { weiEth: wei, usdcUnits: usdcRaw };
+    } catch(err){
+      walletDropdownBalance.textContent = 'Balance unavailable · ' + chainName(currentChainIdHex);
+    }
+  }
+
+  function applyConnectedUI(){
+    const label = shortAddr(currentAccount);
+    walletBtn.classList.add('connected');
+    walletDot.style.display = 'inline-block';
+    walletDot.classList.remove('connecting');
+    walletLabel.textContent = label;
+    walletDropdownAddr.textContent = currentAccount;
+    if(walletInlineLabel) walletInlineLabel.textContent = label;
+    const receiveAddress = document.getElementById('receiveAddress');
+    if(receiveAddress) receiveAddress.textContent = currentAccount;
+    updateNetworkUI();
+    refreshBalance();
+    refreshActivity();
+    refreshPayPanel();
+    loadDashboard();
+  }
+
+  function applyDisconnectedUI(){
+    walletBtn.classList.remove('connected');
+    walletDot.style.display = 'none';
+    walletDot.classList.remove('connecting');
+    walletLabel.textContent = getProvider() ? 'Connect Wallet' : 'Install Wallet';
+    if(walletInlineLabel) walletInlineLabel.textContent = 'Connect your wallet';
+    if(walletDropdownBalance) walletDropdownBalance.textContent = '';
+    walletDropdownAddr.textContent = 'Not connected';
+    const receiveAddress = document.getElementById('receiveAddress');
+    if(receiveAddress) receiveAddress.textContent = 'Connect wallet to view';
+    walletDropdown.classList.remove('open');
+    updateNetworkUI();
+    refreshActivity();
+    refreshPayPanel();
+    loadDashboard();
+    riskAnalyzed = false;
+    refreshRiskPanel();
+  }
+
+  // ---------- Multi-wallet detection (EIP-6963) ----------
+  // Modern wallets announce themselves via this event so a page can offer a
+  // picker when more than one wallet extension is installed (MetaMask,
+  // Coinbase Wallet, Rabby, Brave Wallet, etc. can all live side by side).
+  const detectedWallets = []; // { info:{uuid,name,icon,rdns}, provider }
+  window.addEventListener('eip6963:announceProvider', (event)=>{
+    const detail = event.detail;
+    if(!detail || !detail.info || !detail.provider) return;
+    if(detectedWallets.some(w => w.info.uuid === detail.info.uuid)) return;
+    detectedWallets.push({ info: detail.info, provider: detail.provider });
+  });
+  window.dispatchEvent(new Event('eip6963:requestProvider'));
+
+  function walletOptionsList(){
+    const opts = detectedWallets.map(w => ({
+      key: w.info.uuid,
+      name: w.info.name,
+      icon: w.info.icon,
+      installed: true,
+      provider: w.provider
+    }));
+    // Fallback for wallets that only expose the legacy window.ethereum and
+    // never announced via EIP-6963.
+    const legacy = getProvider();
+    if(legacy && !opts.length){
+      opts.push({ key:'legacy', name: legacy.isMetaMask ? 'MetaMask' : (legacy.isCoinbaseWallet ? 'Coinbase Wallet' : 'Browser Wallet'), icon:'', installed:true, provider: legacy });
+    }
+    // Always show these two as options; if not actually installed, clicking
+    // them sends the user to install instead of connecting.
+    ['MetaMask','Coinbase Wallet'].forEach(name=>{
+      if(!opts.some(o => o.name === name)){
+        opts.push({ key:name.toLowerCase().replace(/\s+/g,'-'), name, icon:'', installed:false, provider:null });
+      }
+    });
+    return opts;
+  }
+
+  const walletModal = document.getElementById('walletConnectModal');
+  const walletModalTitle = document.getElementById('walletModalTitle');
+  const walletModalBody = document.getElementById('walletModalBody');
+
+  function walletIconMarkup(opt){
+    if(opt.icon) return `<img src="${opt.icon}" alt="">`;
+    return (opt.name||'?').slice(0,1).toUpperCase();
+  }
+
+  function openWalletModal(){
+    walletModalTitle.textContent = 'Connect a wallet';
+    const opts = walletOptionsList();
+    walletModalBody.innerHTML = `
+      <div class="wallet-opt-list">
+        ${opts.map(o => `
+          <button class="wallet-opt" data-wallet="${o.key}">
+            <span class="wallet-opt-icon">${walletIconMarkup(o)}</span>
+            <span>
+              <div class="wallet-opt-name">${o.name}</div>
+              <div class="wallet-opt-sub">${o.installed ? 'Detected in this browser' : 'Not detected — click to install'}</div>
+            </span>
+            <span class="wallet-opt-tag ${o.installed ? 'installed' : ''}">${o.installed ? 'Installed' : 'Install'}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="wallet-confirm-note">You can connect more than one wallet over time — CipherShield only ever talks to the one you actively pick, and never auto-connects on load.</div>
+    `;
+    walletModalBody.querySelectorAll('.wallet-opt').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const opt = opts.find(o => o.key === btn.getAttribute('data-wallet'));
+        if(!opt) return;
+        if(!opt.installed){
+          const url = opt.name === 'Coinbase Wallet' ? 'https://www.coinbase.com/wallet/downloads' : 'https://metamask.io/download/';
+          window.open(url, '_blank', 'noopener');
+          return;
+        }
+        renderWalletConfirm(opt);
+      });
+    });
+    walletModal.classList.add('open');
+  }
+
+  function renderWalletConfirm(opt){
+    walletModalTitle.textContent = 'Confirm connection';
+    walletModalBody.innerHTML = `
+      <div class="wallet-confirm-box">
+        <span class="wallet-opt-icon">${walletIconMarkup(opt)}</span>
+        <div>
+          <div class="wallet-opt-name">${opt.name}</div>
+          <div class="wallet-opt-sub">CipherShield will request access to connect</div>
+        </div>
+      </div>
+      <div class="wallet-confirm-note">By continuing, ${opt.name} will share your wallet address and balance with CipherShield and may ask you to approve future transactions. Only continue if you trust this site.</div>
+      <div class="modal-actions">
+        <button class="btn" id="walletConfirmBack">Back</button>
+        <button class="btn btn-primary" id="walletConfirmGo">Connect</button>
+      </div>
+    `;
+    document.getElementById('walletConfirmBack').addEventListener('click', openWalletModal);
+    document.getElementById('walletConfirmGo').addEventListener('click', ()=>{
+      closeWalletModal();
+      connectWallet(opt.provider);
+    });
+  }
+
+  function closeWalletModal(){ walletModal.classList.remove('open'); }
+  document.getElementById('closeWalletModal').addEventListener('click', closeWalletModal);
+  walletModal.addEventListener('click', (e)=>{ if(e.target === walletModal) closeWalletModal(); });
+
+  async function connectWallet(providerOverride){
+    const provider = providerOverride || getProvider();
+    if(!provider){
+      // No injected wallet (MetaMask/Coinbase/Brave etc.) found — send them to install one.
+      window.open('https://metamask.io/download/', '_blank', 'noopener');
+      return;
+    }
+    walletBtn.classList.add('connecting');
+    walletDot.style.display = 'inline-block';
+    walletDot.classList.add('connecting');
+    walletLabel.textContent = 'Connecting…';
+    walletBtn.disabled = true;
+    try{
+      const accounts = await provider.request({ method: 'eth_requestAccounts' });
+      currentAccount = accounts[0];
+      currentChainIdHex = await provider.request({ method: 'eth_chainId' });
+      walletConnected = true;
+      walletWrongNetwork = currentChainIdHex.toLowerCase() !== CONFIG.chainId.toLowerCase();
+      activeWalletProvider = provider;
+      applyConnectedUI();
+      logActivity({icon:'🔌', title:'Wallet connected', sub: shortAddr(currentAccount) + ' · ' + chainName(currentChainIdHex), cat:'wallet'});
+      // CipherShield only supports one network — if the wallet connected on
+      // anything other than Sepolia, prompt the switch immediately rather
+      // than waiting for the user to notice the "wrong network" banner.
+      if(walletWrongNetwork){ switchNetwork(); }
+    } catch(err){
+      // 4001 = user rejected the connection request in their wallet
+      walletLabel.textContent = (err && err.code === 4001) ? 'Request rejected' : 'Connection failed';
+      setTimeout(()=>{ if(!walletConnected) walletLabel.textContent = 'Connect Wallet'; }, 2200);
+    } finally {
+      walletBtn.disabled = false;
+      walletBtn.classList.remove('connecting');
+      walletDot.classList.remove('connecting');
+    }
+  }
+
+  async function disconnectWallet(){
+    const provider = getProvider();
+    // Wallets don't offer a universal "disconnect" — this clears CipherShield's
+    // own session and, where the wallet supports it (EIP-2255), revokes the
+    // permission so it doesn't silently reconnect.
+    try{
+      if(provider && provider.request){
+        await provider.request({
+          method: 'wallet_revokePermissions',
+          params: [{ eth_accounts: {} }],
+        });
+      }
+    } catch(err){ /* not all wallets support revocation — that's fine */ }
+    logActivity({icon:'🔌', title:'Wallet disconnected', sub: shortAddr(currentAccount), cat:'wallet'});
+    feedActivity = [];
+    if(window.CipherCoFHE && window.CipherCoFHE.reset) window.CipherCoFHE.reset();
+    walletConnected = false;
+    walletWrongNetwork = false;
+    currentAccount = null;
+    currentChainIdHex = null;
+    activeWalletProvider = null;
+    applyDisconnectedUI();
+  }
+
+  async function switchNetwork(){
+    const provider = getProvider();
+    if(!provider) return;
+    try{
+      await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: CONFIG.chainId }],
+      });
+    } catch(switchError){
+      if(switchError && switchError.code === 4902){
+        try{
+          await provider.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: CONFIG.chainId,
+              chainName: CONFIG.chainName,
+              nativeCurrency: { name: 'Sepolia ETH', symbol: 'ETH', decimals: 18 },
+              rpcUrls: [CONFIG.rpcUrl],
+              blockExplorerUrls: [CONFIG.blockExplorer],
+            }],
+          });
+        } catch(addError){ console.error('Could not add network:', addError); }
+      } else {
+        console.error('Could not switch network:', switchError);
+      }
+    }
+    // chainChanged listener below will pick up the result and refresh the UI
+  }
+
+  walletBtn.addEventListener('click', ()=>{
+    if(walletBtn.disabled) return;
+    if(!walletConnected){
+      openWalletModal();
+    } else {
+      walletDropdown.classList.toggle('open');
+    }
+  });
+
+  document.getElementById('disconnectBtn').addEventListener('click', ()=>{
+    disconnectWallet();
+  });
+
+  document.getElementById('copyAddrMenuBtn').addEventListener('click', function(){
+    if(!currentAccount) return;
+    if(navigator.clipboard){ navigator.clipboard.writeText(currentAccount).catch(()=>{}); }
+    const original = this.textContent;
+    this.textContent = '✓ Copied';
+    setTimeout(()=>{ this.textContent = original; }, 1500);
+  });
+
+  document.getElementById('switchNetworkBtn').addEventListener('click', ()=>{
+    switchNetwork();
+  });
+
+  document.addEventListener('click', (e)=>{
+    if(!e.target.closest('.wallet-wrap')) walletDropdown.classList.remove('open');
+  });
+
+  // ---------- real wallet event wiring + silent auto-reconnect ----------
+  (function initWalletProvider(){
+    const provider = getProvider();
+    applyDisconnectedUI(); // sets correct "Connect Wallet" vs "Install Wallet" label immediately
+    if(!provider) return;
+
+    // If the site is already authorized (user connected before, on a prior visit),
+    // eth_accounts returns the account(s) without prompting a popup.
+    provider.request({ method: 'eth_accounts' }).then(async (accounts)=>{
+      if(accounts && accounts.length){
+        currentAccount = accounts[0];
+        currentChainIdHex = await provider.request({ method: 'eth_chainId' });
+        walletConnected = true;
+        walletWrongNetwork = currentChainIdHex.toLowerCase() !== CONFIG.chainId.toLowerCase();
+        activeWalletProvider = provider;
+        applyConnectedUI();
+        if(walletWrongNetwork){ switchNetwork(); }
+      }
+    }).catch(()=>{});
+
+    provider.on && provider.on('accountsChanged', (accounts)=>{
+      if(!accounts || accounts.length === 0){
+        // user locked or disconnected the wallet from the extension itself
+        feedActivity = [];
+        if(window.CipherCoFHE && window.CipherCoFHE.reset) window.CipherCoFHE.reset();
+        walletConnected = false; walletWrongNetwork = false; currentAccount = null; currentChainIdHex = null;
+        applyDisconnectedUI();
+      } else {
+        const changed = currentAccount && currentAccount.toLowerCase() !== accounts[0].toLowerCase();
+        if(changed){ feedActivity = []; if(window.CipherCoFHE && window.CipherCoFHE.reset) window.CipherCoFHE.reset(); riskAnalyzed=false; }
+        currentAccount = accounts[0];
+        applyConnectedUI();
+      }
+    });
+
+    provider.on && provider.on('chainChanged', (chainIdHex)=>{
+      if(window.CipherCoFHE && window.CipherCoFHE.reset) window.CipherCoFHE.reset();
+      riskAnalyzed=false;
+      currentChainIdHex = chainIdHex;
+      walletWrongNetwork = currentChainIdHex.toLowerCase() !== CONFIG.chainId.toLowerCase();
+      updateNetworkUI();
+      refreshBalance();
+      // If the wallet itself was switched away from Sepolia (e.g. the user
+      // changed it from inside MetaMask), pull it straight back — this app
+      // is single-network by design.
+      if(walletWrongNetwork){ switchNetwork(); }
+    });
+  })();
+
+  async function refreshPayPanel(){
+    const list=document.getElementById('recentPaymentsList');
+    if(!list)return;
+    if(!walletConnected){ list.innerHTML='<div class="empty-state"><div class="es-icon">🔌</div><div class="es-title">Wallet not connected</div><div class="es-sub">Connect your wallet to see payment activity.</div></div>'; return; }
+    list.innerHTML='<div class="empty-state"><div class="es-icon">⏳</div><div class="es-title">Loading indexed payments…</div><div class="es-sub">Reading ShieldPayLedger events from Sepolia.</div></div>';
+    try {
+      if(!CONFIG.backendUrl){
+        list.innerHTML='<div class="empty-state"><div class="es-icon">ℹ️</div><div class="es-title">Indexer not configured</div><div class="es-sub">Payment transactions still work directly on Sepolia. Add backendUrl to enable indexed ShieldPay history.</div></div>';
+        return;
+      }
+      const base = CONFIG.backendUrl.replace(/\/$/,'');
+      const res = await fetch(base + '/payments/' + currentAccount);
+      const data = await res.json();
+      const rows = Array.isArray(data.payments) ? data.payments : [];
+      if(!rows.length){ list.innerHTML='<div class="empty-state"><div class="es-icon">⛓️</div><div class="es-title">No indexed payments yet</div><div class="es-sub">ShieldPayLedger has no PaymentLogged events for this wallet.</div></div>'; return; }
+      list.innerHTML = rows.map(p=>`<div class="row-list-item"><div><strong>${p.asset}</strong><div class="muted">To ${p.recipient.slice(0,6)}…${p.recipient.slice(-4)} · block ${p.blockNumber}</div></div><div class="mono">${p.amount}</div></div>`).join('');
+    } catch(e) { list.innerHTML='<div class="empty-state"><div class="es-icon">⚠️</div><div class="es-title">Indexer unavailable</div><div class="es-sub">Start the backend with npm run backend.</div></div>'; }
+  }
+
+  // ---------- add funds modal (3-step) ----------
+  const assets = [
+    {sym:'USDC', name:'USD Coin'},
+    {sym:'ETH', name:'Ethereum'},
+    {sym:'wBTC', name:'Wrapped Bitcoin'},
+  ];
+  let modalState = { step: 1, asset: null, amount: '' };
+  const modal = document.getElementById('addFundsModal');
+  const stepContent = document.getElementById('stepContent');
+  const stepNum = document.getElementById('stepNum');
+
+  function renderStep(){
+    stepNum.textContent = modalState.step;
+    if(modalState.step === 1){
+      stepContent.innerHTML = `
+        <div class="asset-list">
+          ${assets.map(a=>`<div class="asset-opt ${modalState.asset===a.sym?'selected':''}" data-asset="${a.sym}"><span class="asset-dot"></span><div><div style="font-weight:500;">${a.sym}</div><div style="font-size:0.78rem;color:var(--muted-dim);">${a.name}</div></div></div>`).join('')}
+        </div>
+        <div class="modal-actions"><button class="btn btn-primary" id="toStep2" style="width:100%;">Next</button></div>
+      `;
+      document.querySelectorAll('.asset-opt').forEach(el=>{
+        el.addEventListener('click', ()=>{ modalState.asset = el.getAttribute('data-asset'); renderStep(); });
+      });
+      document.getElementById('toStep2').addEventListener('click', ()=>{
+        if(!modalState.asset){ modalState.asset = 'USDC'; }
+        modalState.step = 2; renderStep();
+      });
+    } else if(modalState.step === 2){
+      stepContent.innerHTML = `
+        <div class="form-field"><label>Amount (${modalState.asset})</label><input type="text" id="amountInput" placeholder="0.00" value="${modalState.amount}"></div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="backStep1">Back</button>
+          <button class="btn btn-primary" id="toStep3">Next</button>
+        </div>
+      `;
+      document.getElementById('backStep1').addEventListener('click', ()=>{ modalState.step = 1; renderStep(); });
+      document.getElementById('toStep3').addEventListener('click', ()=>{
+        const val = document.getElementById('amountInput').value;
+        modalState.amount = val || '0.00';
+        modalState.step = 3; renderStep();
+      });
+    } else {
+      stepContent.innerHTML = `
+        <div class="confirm-summary">
+          <div>Asset <strong>${modalState.asset}</strong></div>
+          <div>Amount <strong>${modalState.amount}</strong></div>
+          <div>Visibility <strong>Encrypted on deposit</strong></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="backStep2">Back</button>
+          <button class="btn btn-primary" id="confirmAdd">Confirm</button>
+        </div>
+      `;
+      document.getElementById('backStep2').addEventListener('click', ()=>{ modalState.step = 2; renderStep(); });
+      document.getElementById('confirmAdd').addEventListener('click', ()=>{
+        closeModal();
+      });
+    }
+  }
+
+  function openModal(){
+    modalState = { step: 1, asset: null, amount: '' };
+    renderStep();
+    modal.classList.add('open');
+  }
+  function closeModal(){ modal.classList.remove('open'); }
+
+  document.getElementById('fabAdd').addEventListener('click', openModal);
+  document.getElementById('openAddFunds').addEventListener('click', openModal);
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+
+  // ---------- ShieldPay: send/receive tabs ----------
+  const receiveQr = document.getElementById('receiveQr');
+  if(receiveQr){
+    for(let i=0;i<81;i++){
+      const cell = document.createElement('span');
+      if(Math.random() > 0.45) cell.classList.add('on');
+      receiveQr.appendChild(cell);
+    }
+  }
+  const copyAddressBtn = document.getElementById('copyAddressBtn');
+  if(copyAddressBtn){
+    copyAddressBtn.addEventListener('click', ()=>{
+      const addr = document.getElementById('receiveAddress').textContent;
+      if(navigator.clipboard){ navigator.clipboard.writeText(addr).catch(()=>{}); }
+      const original = copyAddressBtn.textContent;
+      copyAddressBtn.textContent = 'Copied ✓';
+      setTimeout(()=>{ copyAddressBtn.textContent = original; }, 1800);
+    });
+  }
+  const payFormWrap = document.getElementById('payFormWrap');
+  const payReceiveWrap = document.getElementById('payReceiveWrap');
+  const paySuccessWrap = document.getElementById('paySuccessWrap');
+  const payFailWrap = document.getElementById('payFailWrap');
+  function showPayPane(which){
+    payFormWrap.style.display = which === 'form' ? 'block' : 'none';
+    payReceiveWrap.style.display = which === 'receive' ? 'block' : 'none';
+    paySuccessWrap.style.display = which === 'success' ? 'block' : 'none';
+    payFailWrap.style.display = which === 'fail' ? 'block' : 'none';
+  }
+  document.querySelectorAll('[data-paytab]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('[data-paytab]').forEach(b=> b.classList.toggle('active', b===btn));
+      showPayPane(btn.getAttribute('data-paytab') === 'send' ? 'form' : 'receive');
+    });
+  });
+
+  // ---------- ShieldPay: encrypt & send (validated, with loading + failure states) ----------
+  const encryptSendBtn = document.getElementById('encryptSendBtn');
+  const payRecipientInput = document.getElementById('payRecipient');
+  const payAmountInput = document.getElementById('payAmount');
+  const payRecipientField = document.getElementById('payRecipientField');
+  const payAmountField = document.getElementById('payAmountField');
+  let lastPayAttempt = null;
+
+  function validatePayForm(){
+    let valid = true;
+    const recipient = payRecipientInput.value.trim();
+    const amount = parseFloat(payAmountInput.value);
+    const addressOk = /^0x[a-fA-F0-9]{40}$/.test(recipient);
+    payRecipientField.classList.toggle('has-error', !addressOk);
+    if(!addressOk) valid = false;
+    const amountOk = !isNaN(amount) && amount > 0;
+    payAmountField.classList.toggle('has-error', !amountOk);
+    if(!amountOk) valid = false;
+    return valid;
+  }
+  [payRecipientInput, payAmountInput].forEach(input=>{
+    input.addEventListener('input', ()=>{
+      input.closest('.form-field').classList.remove('has-error');
+    });
+  });
+
+  const payEncryptToggle = document.getElementById('payEncryptToggle');
+  const payEncryptNote = document.getElementById('payEncryptNote');
+  if(payEncryptToggle && payEncryptNote){
+    payEncryptToggle.addEventListener('change', ()=>{
+      payEncryptNote.style.display = payEncryptToggle.checked ? 'block' : 'none';
+    });
+  }
+
+  // Local store of CoFHE-encrypted payment amounts, keyed by tx hash.
+  // This is app-local (this browser only) since there is no deployed
+  // encrypted-payment contract in this build yet — see the note above
+  // the Send button for exactly what is and isn't hidden on-chain.
+  const ENCRYPTED_PAYMENTS_KEY = 'ciphershield_encrypted_payments';
+  function loadEncryptedPayments(){
+    try{ return JSON.parse(localStorage.getItem(ENCRYPTED_PAYMENTS_KEY) || '{}'); }
+    catch(e){ return {}; }
+  }
+  function saveEncryptedPayment(txHash, entry){
+    try{
+      const all = loadEncryptedPayments();
+      all[txHash.toLowerCase()] = entry;
+      localStorage.setItem(ENCRYPTED_PAYMENTS_KEY, JSON.stringify(all));
+    }catch(e){ console.warn('[CipherShield] could not persist encrypted payment locally:', e); }
+  }
+  window.CipherShieldEncryptedPayments = { load: loadEncryptedPayments, save: saveEncryptedPayment };
+
+  // Human-readable mapping for common wallet/RPC failures, since the
+  // raw provider error text is often confusing (JSON-RPC codes, etc).
+  function friendlySendError(err, context){
+    const msg = (err && (err.message || err.toString())) || '';
+    const lower = msg.toLowerCase();
+    if(err && err.code === 4001) return 'You rejected the transaction in your wallet.';
+    if(lower.includes('insufficient funds') || lower.includes('exceeds balance') || lower.includes('transfer amount exceeds balance')){
+      return context === 'USDC'
+        ? 'Not enough Sepolia USDC in this wallet for that amount. Get free testnet USDC from faucet.circle.com.'
+        : 'Not enough Sepolia ETH in this wallet to cover the amount and gas.';
+    }
+    if(lower.includes('gas required exceeds') || lower.includes('execution reverted') || lower.includes('cannot estimate gas')){
+      return 'The transaction would fail on-chain (contract reverted). Double check the recipient address and that you hold enough balance.';
+    }
+    if(lower.includes('user rejected')) return 'You rejected the transaction in your wallet.';
+    if(lower.includes('network error') || lower.includes('failed to fetch')) return 'Could not reach the Sepolia network. Check your connection and try again.';
+    return msg || 'The wallet rejected the transaction.';
+  }
+
+  // Exact decimal parsing without floating-point rounding.
+  function decimalToUnits(amountStr, decimals){
+    const raw = String(amountStr || '').trim();
+    if(!/^\d+(?:\.\d+)?$/.test(raw)) throw new Error('Invalid amount');
+    const [whole='0', frac=''] = raw.split('.');
+    if(frac.length > decimals) throw new Error(`Maximum ${decimals} decimals`);
+    return BigInt(whole) * (10n ** BigInt(decimals)) +
+      BigInt((frac || '').padEnd(decimals,'0') || '0');
+  }
+
+  function unitsToHex(units){
+    return '0x' + units.toString(16);
+  }
+
+  function encodeAddressArg(address){
+    return address.slice(2).toLowerCase().padStart(64,'0');
+  }
+
+  function encodeUintArg(units){
+    return units.toString(16).padStart(64,'0');
+  }
+
+  function encodeErc20Transfer(recipient, amountUnits){
+    return '0x' + ERC20_TRANSFER_SELECTOR + encodeAddressArg(recipient) + encodeUintArg(amountUnits);
+  }
+
+  async function waitForReceipt(provider, txHash, timeoutMs=120000){
+    const started = Date.now();
+    while(Date.now() - started < timeoutMs){
+      const receipt = await provider.request({
+        method:'eth_getTransactionReceipt',
+        params:[txHash]
+      });
+      if(receipt) return receipt;
+      await new Promise(resolve=>setTimeout(resolve, 2500));
+    }
+    throw new Error('Transaction was submitted, but confirmation timed out. Check the transaction in your wallet/explorer.');
+  }
+
+  async function attemptSend(){
+    const recipient = payRecipientInput.value.trim();
+    const amountVal = payAmountInput.value.trim();
+    const asset = document.getElementById('payAsset').value;
+    const wantsEncrypted = !!(payEncryptToggle && payEncryptToggle.checked);
+    lastPayAttempt = recipient;
+
+    const provider = getProvider();
+    if(!provider || !currentAccount){
+      showPayPane('fail');
+      document.getElementById('payFailReason').textContent = 'Connect a wallet before sending.';
+      return;
+    }
+    if(walletWrongNetwork){
+      showPayPane('fail');
+      document.getElementById('payFailReason').textContent = 'Switch to Ethereum Sepolia before sending a real transaction.';
+      return;
+    }
+    if(asset === 'wBTC'){
+      showPayPane('fail');
+      document.getElementById('payFailReason').textContent = 'wBTC sending is not enabled in this prototype (no token address configured).';
+      return;
+    }
+
+    encryptSendBtn.classList.add('btn-loading');
+    encryptSendBtn.innerHTML = `<span class="spinner"></span> Sending…`;
+
+    const successTxRow = document.getElementById('successTxRow');
+    const successTxHash = document.getElementById('successTxHash');
+    const successAmount = document.getElementById('successAmount');
+    const payFailReason = document.getElementById('payFailReason');
+
+    try{
+      // ---------- pre-flight balance checks ----------
+      // Doing this up front turns a confusing wallet-level revert into a
+      // clear, actionable message instead of a generic "transaction failed".
+      let amountUnits;
+      try{
+        amountUnits = decimalToUnits(amountVal, asset === 'ETH' ? 18 : CONFIG.usdcDecimals);
+      } catch(parseErr){
+        throw new Error(parseErr.message || 'Invalid amount.');
+      }
+
+      const balHex = await provider.request({ method: 'eth_getBalance', params: [currentAccount, 'latest'] });
+      const ethWei = BigInt(balHex);
+
+      if(asset === 'ETH'){
+        if(ethWei < amountUnits){
+          throw new Error('Not enough Sepolia ETH in this wallet for that amount.');
+        }
+      } else if(asset === 'USDC'){
+        if(ethWei === 0n){
+          throw new Error('Not enough Sepolia ETH in this wallet to cover gas for a USDC transfer. Get free Sepolia ETH from a faucet.');
+        }
+        const data = '0x70a08231' + currentAccount.slice(2).padStart(64,'0');
+        const usdcHex = await provider.request({ method:'eth_call', params:[{to:CONFIG.usdc,data}, 'latest'] });
+        const usdcBal = BigInt(usdcHex || '0x0');
+        if(usdcBal < amountUnits){
+          throw new Error('Not enough Sepolia USDC in this wallet for that amount. Get free testnet USDC from faucet.circle.com.');
+        }
+      }
+
+      // ---------- optional client-side CoFHE encryption of the amount ----------
+      // This calls the real @cofhe/sdk client wired up earlier in this file
+      // (window.CipherCoFHE), the same one used for CipherRisk/Private Credit.
+      // It produces a real ciphertext handle for the amount; the ERC-20/native
+      // transfer below still moves real, publicly-visible funds — see the
+      // note under the checkbox in the form for exactly what this does and
+      // does not hide.
+      let encryptedAmount = null;
+      if(wantsEncrypted){
+        if(!window.CipherCoFHE){
+          throw new Error('Fhenix CoFHE client is not available yet — reload the page and try again.');
+        }
+        encryptSendBtn.innerHTML = `<span class="spinner"></span> Encrypting…`;
+        await window.CipherCoFHE.connect();
+        encryptedAmount = await window.CipherCoFHE.encryptUint64(amountUnits);
+      }
+
+      let txHash;
+      encryptSendBtn.innerHTML = `<span class="spinner"></span> Sending…`;
+
+      if(asset === 'ETH'){
+        txHash = await provider.request({
+          method: 'eth_sendTransaction',
+          params: [{ from: currentAccount, to: recipient, value: unitsToHex(amountUnits) }]
+        });
+      } else {
+        txHash = await provider.request({
+          method: 'eth_sendTransaction',
+          params: [{
+            from: currentAccount,
+            to: CONFIG.usdc,
+            data: encodeErc20Transfer(recipient, amountUnits)
+          }]
+        });
+      }
+
+      encryptSendBtn.innerHTML = `<span class="spinner"></span> Confirming…`;
+      const receipt = await waitForReceipt(provider, txHash);
+
+      if(receipt.status && receipt.status !== '0x1'){
+        throw new Error('The transaction was mined but failed.');
+      }
+
+      if(CONFIG.contracts.payment){
+        try {
+          const browserProvider=new ethers.BrowserProvider(window.CipherShieldGetProvider ? window.CipherShieldGetProvider() : window.ethereum);
+          const signer=await browserProvider.getSigner();
+          const ledger=new ethers.Contract(CONFIG.contracts.payment,[{name:'logPayment',type:'function',stateMutability:'nonpayable',inputs:[{name:'recipient',type:'address'},{name:'token',type:'address'},{name:'amount',type:'uint256'},{name:'txRef',type:'bytes32'}],outputs:[]}],signer);
+          const ref=ethers.id(txHash);
+          await (await ledger.logPayment(recipient, asset==='ETH' ? ethers.ZeroAddress : CONFIG.usdc, amountUnits, ref)).wait();
+        } catch(logErr){ console.warn('Payment indexing log failed:',logErr); }
+      }
+
+      if(encryptedAmount){
+        saveEncryptedPayment(txHash, {
+          amountVal, asset, recipient,
+          ctHash: encryptedAmount.ctHash,
+          securityZone: encryptedAmount.securityZone,
+          utype: encryptedAmount.utype,
+          ts: Date.now()
+        });
+      }
+
+      encryptSendBtn.classList.remove('btn-loading');
+      encryptSendBtn.textContent = 'Send';
+      document.getElementById('successRecipient').textContent = recipient;
+      if(successAmount){
+        successAmount.textContent = encryptedAmount ? '🔒 Encrypted (CoFHE)' : (amountVal + ' ' + asset);
+      }
+      if(successTxRow && successTxHash){
+        successTxHash.textContent = txHash;
+        successTxRow.style.display = 'flex';
+      }
+      showPayPane('success');
+      refreshBalance();
+      refreshPayPanel();
+      logActivity({
+        icon: encryptedAmount ? '🔒' : '💸',
+        title: (encryptedAmount ? 'Sent (encrypted) ' : 'Sent ') + (encryptedAmount ? asset : amountVal+' '+asset),
+        sub: 'To '+shortAddr(recipient)+' · '+txHash.slice(0,10)+'…',
+        cat: 'payments'
+      });
+    } catch(err){
+      encryptSendBtn.classList.remove('btn-loading');
+      encryptSendBtn.textContent = 'Send';
+      if(payFailReason){
+        payFailReason.textContent = friendlySendError(err, asset);
+      }
+      showPayPane('fail');
+    }
+  }
+
+  if(encryptSendBtn){
+    encryptSendBtn.addEventListener('click', ()=>{
+      if(!walletConnected){
+        openWalletModal();
+        return;
+      }
+      if(!validatePayForm()){
+        encryptSendBtn.classList.add('shake');
+        setTimeout(()=> encryptSendBtn.classList.remove('shake'), 500);
+        return;
+      }
+      attemptSend();
+    });
+  }
+
+  const retryPayBtn = document.getElementById('retryPayBtn');
+  if(retryPayBtn){
+    retryPayBtn.addEventListener('click', ()=>{
+      showPayPane('form');
+      if(!validatePayForm()) return;
+      attemptSend();
+    });
+  }
+  const cancelPayBtn = document.getElementById('cancelPayBtn');
+  if(cancelPayBtn){
+    cancelPayBtn.addEventListener('click', ()=>{
+      showPayPane('form');
+    });
+  }
+
+  const sendAnotherBtn = document.getElementById('sendAnotherBtn');
+  if(sendAnotherBtn){
+    sendAnotherBtn.addEventListener('click', ()=>{
+      payRecipientInput.value = '';
+      payAmountInput.value = '';
+      showPayPane('form');
+    });
+  }
+</script>
+
+
+<script>
+/* CipherShield upgraded runtime:
+   - contract addresses are fetched automatically from /config
+   - payment history comes from the backend event indexer
+   - no private key is ever placed in the browser
+*/
+(function(){
+  const CS = window.CipherShieldRuntime = {
+    config: null,
+    payments: [],
+    async loadConfig(){
+      const base = (window.CIPHERSHIELD_BACKEND_URL || window.CONFIG?.backendUrl || '/api').replace(/\/$/,'');
+      try {
+        const r = await fetch(base + '/config', {cache:'no-store'});
+        if(!r.ok) throw new Error('Backend /config unavailable');
+        this.config = await r.json();
+        if(window.CONFIG && this.config.contracts){
+          // Backend config may fill missing addresses, but must never erase
+          // addresses already embedded in the single-file build.
+          window.CONFIG.contracts.fheRisk = this.config.contracts.fheRisk || window.CONFIG.contracts.fheRisk || '';
+          window.CONFIG.contracts.fheCredit = this.config.contracts.fheCredit || window.CONFIG.contracts.fheCredit || '';
+          window.CONFIG.contracts.payment = this.config.contracts.payment || window.CONFIG.contracts.payment || '';
+        }
+        return this.config;
+      } catch(e) {
+        console.warn('[CipherShield] backend config:', e.message);
+        return null;
+      }
+    },
+    async paymentsFor(address){
+      if(!address) return [];
+      const base = (window.CIPHERSHIELD_BACKEND_URL || window.CONFIG?.backendUrl || '/api').replace(/\/$/,'');
+      const r = await fetch(base + '/payments/' + encodeURIComponent(address), {cache:'no-store'});
+      if(!r.ok) throw new Error('Payment indexer unavailable');
+      const data = await r.json();
+      this.payments = Array.isArray(data.payments) ? data.payments : [];
+      return this.payments;
+    },
+    async health(){
+      const base = (window.CIPHERSHIELD_BACKEND_URL || window.CONFIG?.backendUrl || '/api').replace(/\/$/,'');
+      try {
+        const r = await fetch(base + '/health', {cache:'no-store'});
+        return await r.json();
+      } catch(e) { return {ok:false, error:e.message}; }
+    }
+  };
+
+  // Auto-load addresses on startup; the UI never needs hardcoded deployed addresses.
+  document.addEventListener('DOMContentLoaded', async () => {
+    await CS.loadConfig();
+    window.dispatchEvent(new CustomEvent('ciphershield:backend-ready', {detail:CS.config}));
+  });
+})();
+</script>
+
+
+<section id="indexedPaymentHistory" class="view" aria-label="Indexed payment history">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Payment History</h2>
+      <p>Indexed from on-chain <code>PaymentLogged</code> events. Sent and received activity is loaded from the CipherShield backend.</p>
+    </div>
+    <div id="csIndexerStatus" class="empty-state">
+      <div class="es-icon">◌</div>
+      <div class="es-title">Connect your wallet</div>
+      <div class="es-sub">Your indexed payment history will appear here.</div>
+    </div>
+    <div id="csPaymentRows"></div>
+  </div>
+</section>
+<script>
+(function(){
+  function esc(v){
+    return String(v ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+  function short(a){ return a && a.length > 12 ? a.slice(0,6)+'…'+a.slice(-4) : (a||'—'); }
+  function render(payments, address){
+    const box = document.getElementById('csPaymentRows');
+    const status = document.getElementById('csIndexerStatus');
+    if(!payments.length){
+      status.innerHTML = '<div class="es-icon">⌁</div><div class="es-title">No indexed payments yet</div><div class="es-sub">After a ShieldPay transfer is confirmed, the PaymentLogged event will appear here.</div>';
+      box.innerHTML = '';
+      return;
+    }
+    status.innerHTML = '<div class="es-title">Indexed payments: '+payments.length+'</div><div class="es-sub">Source: Sepolia PaymentLogged events</div>';
+    const encryptedStore = window.CipherShieldEncryptedPayments ? window.CipherShieldEncryptedPayments.load() : {};
+    box.innerHTML = payments.slice().reverse().map((p, idx) => {
+      const sent = String(p.sender||'').toLowerCase() === String(address||'').toLowerCase();
+      const asset = p.token && p.token !== '0x0000000000000000000000000000000000000000' ? 'USDC' : 'ETH';
+      const hashKey = String(p.txHash || p.transactionHash || p.hash || '').toLowerCase();
+      const enc = hashKey ? encryptedStore[hashKey] : null;
+      const rowId = 'csRow' + idx;
+      const amountHtml = enc
+        ? '<span class="mono" id="'+rowId+'-amt">🔒 Encrypted</span> <button class="reveal-toggle" data-decrypt-row="'+rowId+'" data-ct-hash="'+esc(enc.ctHash)+'" data-asset="'+esc(enc.asset||asset)+'">Decrypt</button>'
+        : '<span class="mono">'+esc(p.amountFormatted || p.amount || '—')+'</span>';
+      return '<div class="panel" style="margin:10px 0;padding:16px;border:1px solid var(--border);border-radius:var(--radius-md)">' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">' +
+        '<strong>'+esc(sent?'Sent':'Received')+' · '+esc(asset)+'</strong>' +
+        amountHtml + '</div>' +
+        '<div class="muted" style="margin-top:7px">From '+esc(short(p.sender))+' → '+esc(short(p.recipient))+'</div>' +
+        '<div class="muted" style="margin-top:5px">Block '+esc(p.blockNumber)+' · <a target="_blank" rel="noopener" href="'+esc(p.explorerUrl||'#')+'">View tx</a></div>' +
+        '</div>';
+    }).join('');
+    box.querySelectorAll('[data-decrypt-row]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const rowId = btn.getAttribute('data-decrypt-row');
+        const ctHash = btn.getAttribute('data-ct-hash');
+        const assetForDecimals = btn.getAttribute('data-asset') || 'USDC';
+        const decimals = assetForDecimals === 'ETH' ? 18 : CONFIG.usdcDecimals;
+        const amtEl = document.getElementById(rowId+'-amt');
+        btn.disabled = true;
+        btn.textContent = 'Decrypting…';
+        try{
+          if(!window.CipherCoFHE) throw new Error('CoFHE client unavailable');
+          await window.CipherCoFHE.connect();
+          const raw = await window.CipherCoFHE.decryptUint64(ctHash);
+          const units = BigInt(raw);
+          const whole = units / (10n ** BigInt(decimals));
+          const frac = units % (10n ** BigInt(decimals));
+          if(amtEl) amtEl.textContent = whole.toString() + '.' + frac.toString().padStart(decimals,'0').slice(0,2) + ' ' + assetForDecimals;
+          btn.textContent = 'Decrypted ✓';
+        }catch(e){
+          btn.textContent = 'Decrypt failed';
+          console.warn('[CipherShield] decrypt failed:', e);
+        }
+      });
+    });
+  }
+  async function refresh(){
+    const provider = window.CipherShieldGetProvider ? window.CipherShieldGetProvider() : window.ethereum;
+    if(!provider) return;
+    try{
+      const accounts = await provider.request({method:'eth_accounts'});
+      if(!accounts || !accounts[0]) return;
+      const payments = await window.CipherShieldRuntime.paymentsFor(accounts[0]);
+      render(payments, accounts[0]);
+    }catch(e){
+      const status = document.getElementById('csIndexerStatus');
+      if(status) status.innerHTML = '<div class="es-title">Indexer not reachable</div><div class="es-sub">'+esc(e.message)+'</div>';
+    }
+  }
+  window.CipherShieldRefreshPayments = refresh;
+  window.addEventListener('ciphershield:backend-ready', refresh);
+  {
+    const activeProvider = window.CipherShieldGetProvider ? window.CipherShieldGetProvider() : window.ethereum;
+    if(activeProvider && activeProvider.on){
+      activeProvider.on('accountsChanged', refresh);
+      activeProvider.on('chainChanged', refresh);
+    }
+  }
+  setInterval(refresh, 15000);
+})();
+</script>
+
+
+<script>
+/* Single-file config was applied early; keep this hook for backwards compatibility. */
+(function () {
+  const s = window.CIPHERSHIELD_SINGLE_FILE || {};
+  if (!window.CONFIG) return;
+  if (s.backendUrl) window.CONFIG.backendUrl = s.backendUrl;
+  if (s.contracts) Object.keys(s.contracts).forEach(k => { if (s.contracts[k]) window.CONFIG.contracts[k] = s.contracts[k]; });
+})();
+</script>
+
+
+
+<script>
+(function(){
+  const typeEl=document.getElementById('labType'), input=document.getElementById('labPlaintext'), encBtn=document.getElementById('labEncryptBtn'), decBtn=document.getElementById('labDecryptBtn');
+  const encStatus=document.getElementById('labEncryptStatus'), decStatus=document.getElementById('labDecryptStatus'), ctOut=document.getElementById('labCiphertext'), plainOut=document.getElementById('labPlainResult');
+  const sdkStatus=document.getElementById('labSdkStatus'), badge=document.getElementById('labCofheBadge'), help=document.getElementById('labInputHelp');
+  let lastCipher=null;
+  function sync(){
+    const t=typeEl.value;
+    if(t==='text'){ input.type='text'; input.inputMode='text'; input.placeholder='Enter up to 24 characters'; help.textContent='Each UTF-16 code unit is encrypted separately as a real CoFHE uint16 input.'; }
+    else { input.type='text'; input.inputMode='numeric'; input.placeholder=t==='uint16'?'0–65535':'Unsigned integer'; help.textContent=t==='uint16'?'Encrypted as FHE uint16.':'Encrypted as FHE uint64.'; }
+  }
+  typeEl.addEventListener('change',sync); sync();
+  function status(el,text,kind){if(el){el.textContent=text;el.className='data-source '+(kind||'');}}
+  async function ensure(){
+    if(!window.CipherCoFHE) throw new Error('CoFHE SDK unavailable.');
+    if(!window.CipherShieldGetProvider || !window.CipherShieldGetProvider()) throw new Error('Wallet not connected.');
+    await window.CipherCoFHE.connect();
+  }
+  async function encrypt(){
+    if(!walletConnected){openWalletModal();return;}
+    encBtn.disabled=true; status(encStatus,'ENCRYPTING…'); ctOut.textContent='Encrypting with Fhenix / CoFHE…';
+    try{
+      await ensure(); const t=typeEl.value;
+      if(t==='text'){
+        const text=input.value; if(!text||text.length>24) throw new Error('Enter 1–24 characters.');
+        const units=Array.from(text).flatMap(ch=>{const u=[]; for(const c of ch) u.push(c.charCodeAt(0)); return u;});
+        if(units.some(v=>v>65535)) throw new Error('Text contains an unsupported code unit.');
+        const items=[]; for(const v of units) items.push(await window.CipherCoFHE.encryptUint16(v));
+        lastCipher={type:'text',items};
+        ctOut.textContent=items.map((x,i)=>`${i+1}: ${x.ctHash}`).join('\n');
+      }else{
+        const v=input.value.trim(); if(!/^\d+$/.test(v)) throw new Error('Enter a non-negative integer.');
+        const n=BigInt(v); if(t==='uint16'&&n>65535n) throw new Error('uint16 maximum is 65535.');
+        lastCipher={type:t,item:t==='uint16'?await window.CipherCoFHE.encryptUint16(n):await window.CipherCoFHE.encryptUint64(n)};
+        ctOut.textContent=lastCipher.item.ctHash;
+        document.getElementById('labCipherInput').value=lastCipher.item.ctHash;
+        document.getElementById('labDecryptType').value=t;
+      }
+      status(encStatus,'SUCCESS · ciphertext generated','ok');
+      logActivity({icon:'🔒',title:'Value encrypted with CoFHE',sub:'Ciphertext generated in browser',cat:'encrypt'});
+    }catch(e){status(encStatus,e.message||'Encryption failed','warn');ctOut.textContent='No ciphertext generated.';}
+    finally{encBtn.disabled=false;}
+  }
+  async function decrypt(){
+    if(!walletConnected){openWalletModal();return;}
+    const hash=document.getElementById('labCipherInput').value.trim(); if(!hash) {status(decStatus,'Ciphertext handle required','warn');return;}
+    decBtn.disabled=true; status(decStatus,'DECRYPTING / AUTHORIZING…'); plainOut.textContent='Waiting for authorized Fhenix / CoFHE view decryption…';
+    try{
+      await ensure(); const t=document.getElementById('labDecryptType').value;
+      const value=t==='uint16'?await window.CipherCoFHE.decryptUint16(hash):await window.CipherCoFHE.decryptUint64(hash);
+      plainOut.textContent=String(value); status(decStatus,'SUCCESS · authorized result','ok');
+      logActivity({icon:'🔓',title:'Authorized ciphertext decrypted',sub:'Fhenix / CoFHE view result',cat:'encrypt'});
+    }catch(e){plainOut.textContent='Decryption unavailable or unauthorized.';status(decStatus,e.message||'Unauthorized decryption','warn');}
+    finally{decBtn.disabled=false;}
+  }
+  encBtn.addEventListener('click',encrypt); decBtn.addEventListener('click',decrypt);
+  window.CipherShieldRefreshLab=()=>{
+    const connected=!!walletConnected; document.getElementById('labWalletStatus').textContent=connected?shortAddr(currentAccount):'Wallet not connected';
+    document.getElementById('labNetworkStatus').textContent=connected?chainName(currentChainIdHex):'Data unavailable';
+    const available=!!window.CipherCoFHE; sdkStatus.textContent=available?'AVAILABLE':'UNAVAILABLE'; badge.textContent=available?'AVAILABLE':'SDK unavailable'; badge.className='source-badge '+(available?'live':'warn');
+  };
+  window.addEventListener('load',()=>setTimeout(window.CipherShieldRefreshLab,500));
+})();
+</script>
+
+<script>
+window.CipherShieldFHE = { version: 'cofhe-0.6.1' };
+</script>
+
+</body>
+</html>
